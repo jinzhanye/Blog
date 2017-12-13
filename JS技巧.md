@@ -20,3 +20,4 @@
             timeoutId = setTimeout(callback, 50);
         };
 ````
+- frameElement减少repaint
