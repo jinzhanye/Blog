@@ -3,14 +3,18 @@
 
 ### 应用序(applicative order)与正常序(normal order)
 #### 应用序
-- 过程：不管该值是否用到，都会先进行求值(eval)，后进行运算(apply)
-- example
+过程：不管该值是否用到，都会先进行求值(eval)，后进行运算(apply)
+
+example：
+
 ````
 
 ````
 #### 正常序
-- 过程：不断进行替代模型，直到需要用到该值时才进行求值(eval)。
-- example:
+过程：不断进行替代模型，直到需要用到该值时才进行求值(eval)。
+
+example:
+
 ````
 
 ````
@@ -37,6 +41,7 @@ for循环，尾递归优化
 - 闭包性质
 - double,求导等应用
 - 加一种cons的实现方式
+
 ````
 (define (cons x y)
   (define (dispatch m)
@@ -51,6 +56,7 @@ for循环，尾递归优化
 - **用愿望思维写程序**
 思想：过程也被看作成数据
 - 利用数据抽象进行分数操作
+
 ````
 ;*****分数数据抽象
 (define (equla-rat? x y)
@@ -115,6 +121,7 @@ for循环，尾递归优化
 
 
 - filter实现
+
 ````
 (define (filter predicate sequence)
   (cond ((null? sequence) nil)
@@ -124,6 +131,7 @@ for循环，尾递归优化
         (else (filter predicate (cdr sequence)))))
 ````
 - 递归实现map
+
 ````
 (define (map proc items)
   (if (null? items)
