@@ -13,7 +13,7 @@
         ````
 
 - 渲染 vnode 与 占位符 vnode 的区别
-    1. 什么叫渲染 vnode，什么叫 占位符 vnode?? 
+    1. tag 为原生标签的vnode ，叫做渲染 vnode，tag 为组件标签的叫占位符 vnode 
     1. 渲染 vnode 没有 componentInstance 属性，而占位符 vnode 有
     1. 渲染 vnode 的 tag 为原生 tag，而占位符 vnode 的 tag 为 'vue-component'-cid-componentName
 
@@ -36,4 +36,8 @@
     - vm.$vnode 指向该组件 vnode，定义在 Vue.prototype._render `vm.$vnode = _parentVnode`
     - vm._node 指向 render 返回的 vnode， _update 方法 `vm._vnode = vnode`
 
-- vnode.elm = vnode.componentInstance.$el ，见 patch.js/initComponent
+无论是渲染vnode，还是占位符vnode, vnode.elm 属性必须是创建这个vnode对象的真实DOM后才定义的
+- 渲染vnode:patch.js/createElm `vnode.elm = nodeOps.createElement(tag, vnode)`
+- 占位符vnode，`vnode.elm = vnode.componentInstance.$el` ，见 patch.js/createElm/createComponent/initComponent
+- patch 返回创建后的真实DOM , `vm.$el = vm.__patch__(prevVnode, vnode)` 
+- vm.$el 与 vnode.elm 是同一个东西。上面提到的vnode.componentInstance就是 vm

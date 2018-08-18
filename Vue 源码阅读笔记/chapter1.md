@@ -19,7 +19,7 @@
     1. 创建 vnode。如果判断 tag 为 原生tag ，就调用 new VNode 创建 vnode。如果 tag 为 组件名tag / options / constructor 则调用 createComponent(这个函数名起得非常不好，如果改为 createComponentVNode 会更加直观) 创建组件类型 vnode (注意，这个 createComponent 不是 patch 的 那个 createComponent，并没有递归的过程，只是简单成构造一个 vnode 实例)。
     
 1. 回到 `vm._update`，主要是调用patch方法，并将结果保存到 `vm.$el`， `vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)`
-1. patch
+1. patch。下面步骤在 oldvnode isDef 时执行
     1. 调用 emptyNodeAt 方法把 $el 转换成 vnode 实例，也就是 oldVnode
     1. 调用 createEle ，将 vnode 转化成真实 DOM，将并插入到它的父节点中。
     1. 从父节点中删除 oldVnode
