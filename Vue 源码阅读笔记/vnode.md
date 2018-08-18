@@ -13,7 +13,7 @@
         ````
 
 - 渲染 vnode 与 占位符 vnode 的区别
-    1. 由 render 函数返回的 vnode 称为渲染 vnode，通过 create-component.js/createElement 方法生成的 vnode，称为占位符 vnode 
+    1. 什么叫渲染 vnode，什么叫 占位符 vnode?? 
     1. 渲染 vnode 没有 componentInstance 属性，而占位符 vnode 有
     1. 渲染 vnode 的 tag 为原生 tag，而占位符 vnode 的 tag 为 'vue-component'-cid-componentName
 
@@ -31,6 +31,9 @@
     1. 普通元素节点 vnode._isComponent 为 false，而组件节点 vnode._isComponent 为 true。 见 createComponentInstanceForVnode 方法
 
     
-- 占位符 vnode 与 vm 的相互引用 
-    - vnode.componentInstance 指向vm，定义在 create-component.js componentVNodeHooks的init方法
-    - vm.$vnode 指向该组件的占位符 vnode，定义在 Vue.prototype._render `vm.$vnode = _parentVnode`
+- vnode 与 vm 的相互引用 
+    - 组件vnode, vnode.componentInstance 指向vm，定义在 create-component.js componentVNodeHooks的init方法
+    - vm.$vnode 指向该组件 vnode，定义在 Vue.prototype._render `vm.$vnode = _parentVnode`
+    - vm._node 指向 render 返回的 vnode， _update 方法 `vm._vnode = vnode`
+
+- vnode.elm = vnode.componentInstance.$el ，见 patch.js/initComponent
