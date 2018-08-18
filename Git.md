@@ -8,3 +8,5 @@ git fetch ssh://xxxxx
 git push origin xx分支
 
 ### 删除仓库
+
+git remote rm origin
