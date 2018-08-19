@@ -36,8 +36,14 @@
     - vm.$vnode 指向该组件 vnode，定义在 Vue.prototype._render `vm.$vnode = _parentVnode`
     - vm._node 指向 render 返回的 vnode， _update 方法 `vm._vnode = vnode`
 
-无论是渲染vnode，还是占位符vnode, vnode.elm 属性必须是创建这个vnode对象的真实DOM后才定义的
-- 渲染vnode:patch.js/createElm `vnode.elm = nodeOps.createElement(tag, vnode)`
-- 占位符vnode，`vnode.elm = vnode.componentInstance.$el` ，见 patch.js/createElm/createComponent/initComponent
-- patch 返回创建后的真实DOM , `vm.$el = vm.__patch__(prevVnode, vnode)` 
-- vm.$el 与 vnode.elm 是同一个东西。上面提到的vnode.componentInstance就是 vm
+- vm.$el 的来源
+    - patch 返回创建后的真实DOM , `vm.$el = vm.__patch__(prevVnode, vnode)` 
+
+- vnode.componentInstance 与 vnode.context 的区别
+vnode.context 指向 vnode 所对应的 vm 实例。而 vnode.componentInstance 指向该占位符 vnode 对应的渲染 vnode 的 vm 实例
+   
+- vnode.elm 的来源
+    - 无论是渲染vnode，还是占位符vnode, vnode.elm 属性必须是创建这个vnode对象的真实DOM后才定义的
+    - 渲染vnode，`vnode.elm = nodeOps.createElement(tag, vnode)`，见 patch.js/createElm
+    - 占位符vnode，`vnode.elm = vnode.componentInstance.$el` ，见 patch.js/createElm/createComponent/initComponent
+    - vnode.elm 与 vm.$el 是同一个东西。`vnode.componentInstance` 指向当前组件的渲染vnode 对应的 vm 实例

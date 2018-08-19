@@ -19,11 +19,20 @@
     1. 创建 vnode。如果判断 tag 为 原生tag ，就调用 new VNode 创建 vnode。如果 tag 为 组件名tag / options / constructor 则调用 createComponent(这个函数名起得非常不好，如果改为 createComponentVNode 会更加直观) 创建组件类型 vnode (注意，这个 createComponent 不是 patch 的 那个 createComponent，并没有递归的过程，只是简单成构造一个 vnode 实例)。
     
 1. 回到 `vm._update`，主要是调用patch方法，并将结果保存到 `vm.$el`， `vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)`
-1. patch。下面步骤在 oldvnode isDef 时执行
+1. patch。顶级节点 patch 时，oldVNode 不为 undefined，执行以下步骤
     1. 调用 emptyNodeAt 方法把 $el 转换成 vnode 实例，也就是 oldVnode
     1. 调用 createEle ，将 vnode 转化成真实 DOM，将并插入到它的父节点中。
     1. 从父节点中删除 oldVnode
+    1. 调用 `invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)` 遍历 insertedVnodeQueue，执行每个组件的 mounted 方法 
     1. 返回 vnode.elm
+   
+   组件第一次 pacth时，oldVNode 为 undefined，执行以下步骤
+   
+   1. 调用 createEle ，将 vnode 转化成真实 DOM。
+   1. 调用 `invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)` 遍历 insertedVnodeQueue，执行每个组件的 mounted 方法 
+   1. 返回 vnode.elm
+   
+   最后回溯到 pacth.js/createComponent，才将这个真实DOM 插入到父节点。
     
 1. createEle
     1. 调用 createComponent 递归创建组件，如果返回 true，则直接 return。否则继续往下走
