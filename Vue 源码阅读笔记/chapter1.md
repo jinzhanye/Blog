@@ -21,23 +21,22 @@
 1. 回到 `vm._update`，主要是调用patch方法，并将结果保存到 `vm.$el`， `vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)`
 1. patch。顶级节点 patch 时，oldVNode 不为 undefined，执行以下步骤
     1. 调用 emptyNodeAt 方法把 $el 转换成 vnode 实例，也就是 oldVnode
-    1. 调用 createEle ，将 vnode 转化成真实 DOM，将并插入到它的父节点中。
+    1. 调用 createElm ，将 vnode 转化成真实 DOM，将并插入到它的父节点中。
     1. 从父节点中删除 oldVnode
     1. 调用 `invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)` 遍历 insertedVnodeQueue，执行每个组件的 mounted 方法 
     1. 返回 vnode.elm
    
-   组件第一次 pacth时，oldVNode 为 undefined，执行以下步骤
+   组件渲染vnode  第一次 pacth时，oldVNode 为 undefined，执行以下步骤
    
-   1. 调用 createEle ，将 vnode 转化成真实 DOM。
-   1. 调用 `invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)` 遍历 insertedVnodeQueue，执行每个组件的 mounted 方法 
+   1. 调用 createElm ，createElm 再调用 createComponent 将 vnode 转化成真实 DOM。
+   1. 调用 `invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)` 但因为是组件第一次path，所以不会遍历 insertedVnodeQueue 
    1. 返回 vnode.elm
-   
-   最后回溯到 pacth.js/createComponent，才将这个真实DOM 插入到父节点。
+   1. 最终回溯到 parentVnode(占位符vnode) 的 pacth.js/createComponent，才将这个真实DOM 插入到父节点。
     
-1. createEle
+1. createElm
     1. 调用 createComponent 递归创建组件，如果返回 true，则直接 return。否则继续往下走
     1. 将 vnode 转化成真实 DOM
-    1. 将当前 vnode 作为父节点，调用 createChildren 为孩子节点递归调用 createEle
+    1. 将当前 vnode 作为父节点，调用 createChildren 为孩子节点递归调用 createElm
     1. 将真实 DOM 插入到父节点   
 
 patch.js/createComponent 
