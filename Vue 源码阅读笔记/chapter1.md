@@ -1,8 +1,5 @@
-- 初始化过程 $mount
- - 非组件 $mount
- - 组件 $mount
- 
- 
+# 初始化过程
+
 1. Vue  只能通过 new 关键字初始化，然后构造函数内部调用 this._init 方法
 1. _init 方法主要就干了几件事件，合并配置、初始化生命周期、初始化事件、初始化渲染、初始化 data、props、computed、watcher 等等，最后调用 vm.$mount(vm.$options.el)
 1. runtime with compiler 版本的 $mount 方法将 template 转换成 render 函数(在 Vue 2.0 版本中，所有 Vue 的组件的渲染最终都需要 render 方法，无论我们是用单文件 .vue 方式开发组件，还是写了 el 或者 template 属性，最终都会转换成 render 方法，那么这个过程是 Vue 的一个“在线编译”的过程)，

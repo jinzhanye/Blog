@@ -16,9 +16,7 @@
     1. tag 为原生标签的vnode ，叫做渲染 vnode，tag 为组件标签的叫占位符 vnode 
     1. 渲染 vnode 没有 componentInstance 属性，而占位符 vnode 有
     1. 渲染 vnode 的 tag 为原生 tag，而占位符 vnode 的 tag 为 'vue-component'-cid-componentName
-
-- 普通元素节点 vnode 与 组件节点 vnode 的区别
-    1. 普通元素节点 vnode 有 children 属性， 而组件节点 vnode 的 children 属性为 undefined。具体见 create-component.js
+    1. 渲染 vnode 有 children 属性， 占位符 vnode 的 children 属性为 undefined。具体见 create-component.js
     
         ````js
         const vnode = new VNode(
@@ -28,9 +26,7 @@
         asyncFactory
         )
         ````
-    1. 普通元素节点 vnode._isComponent 为 false，而组件节点 vnode._isComponent 为 true。 见 createComponentInstanceForVnode 方法
 
-    
 - vnode 与 vm 的相互引用 
     - 组件vnode, vnode.componentInstance 指向vm，定义在 create-component.js componentVNodeHooks的init方法
     - vm.$vnode 指向该组件 vnode，定义在 Vue.prototype._render `vm.$vnode = _parentVnode`
