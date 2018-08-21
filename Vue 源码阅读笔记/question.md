@@ -9,3 +9,12 @@ var isRealElement = isDef(oldVnode.nodeType);
 所有问题的答案在于，当 oldVnode 为一个真实DOM 时才会有 nodeType 属性。 nodeType 是 Document 对象的属性。 Vnode 对象是没有这个属性的。
 所以可以用这个属性来区分真实 DOM 与 Vnode。
 
+- toggleObserving 是干嘛用的
+
+````js
+var shouldObserve = true;// 初始化 
+
+function toggleObserving (value) {
+  shouldObserve = value;
+}
+````
