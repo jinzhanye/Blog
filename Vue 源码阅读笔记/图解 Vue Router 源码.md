@@ -121,7 +121,28 @@ beforeCreate () {
 ## init
 `_route.init` 过程比较复杂, `init` 方法主要做了如下事情
 
+- 只执行一次
 
+`init` 场景下，`transitionTo` 传入的回调函数是 `setupHashListener`，监听 `url` ，当 `url` 发生变化时调用 `transitionTo` 切换路由。
+ 
+````js
+history.transitionTo(
+  history.getCurrentLocation(),
+  setupHashListener,// onComplete
+  setupHashListener
+)
+
+// history/hash.js
+setupListeners () {
+  // .....
+  window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', () => {
+    // .....
+    this.transitionTo(getHash(), route => {
+      // ....
+    })
+  })
+}
+````
 
 ## transitionTo
 `history.transitionTo`，这个方法的作用是切换当前路由，也就是切换 `history.current`。定义如下
@@ -178,3 +199,86 @@ matced = [{path:'/bar',/*..其他属性..*/},{path:'/bar/baz',/*..其他属性..
 ````
 
 注意，里面的对象的顺序是非常重要的，顺序代表的是路由的深度。`RouterView` 就是利用深度匹配出 `routeRecord`。
+
+## confirmTransition
+`transitionTo` 执行完 `match` 方法后拿到 `route` 对象，将 `route` 对象作为 `confirmTransition` 参数往下执行。
+
+先通过 `resolveQueue` 获取 `updated`(需要更新的路由)、`deactivated`(失活的路由)、`activated`(被激活的路由) 这几个 `RouteRecord` 数组。
+
+````js
+const {
+      updated,
+      deactivated,
+      activated
+    } = resolveQueue(this.current.matched, route.matched)
+````
+
+接下来通过 `extractXXGuards` 方法从这几个数组中提取开发者在`组件`注册的守卫函数，通过 `activated.map(m => m.beforeEnter)` 获取路由配置中的 `beforeEnter` 守卫函数，通过 `this.router.xxHooks` 获取`全局`注册的守卫函数。
+然后通过 `runQueue` 方法按[官方文档](https://router.vuejs.org/zh/guide/advanced/navigation-guards.html#%E7%BB%84%E4%BB%B6%E5%86%85%E7%9A%84%E5%AE%88%E5%8D%AB)所说的顺序执行这些守卫函数。
+
+1. 导航被触发。
+1. 在失活的组件里调用 beforeRouteLeave 守卫。
+1. 调用全局的 beforeEach 守卫。
+1. 在重用的组件里调用 beforeRouteUpdate 守卫 (2.2+)。
+1. 在路由配置里调用 beforeEnter。
+1. 解析异步路由组件。
+1. 在被激活的组件里调用 beforeRouteEnter。
+1. 调用全局的 beforeResolve 守卫 (2.5+)。
+1. 导航被确认。
+1. 调用全局的 afterEach 钩子。
+1. 触发 DOM 更新。
+1. 用创建好的实例调用 beforeRouteEnter 守卫中传给 next 的回调函数。
+
+````js
+runQueue(queue, iterator, () => {
+  // .......
+  const queue = enterGuards.concat(this.router.resolveHooks)
+  runQueue(queue, iterator, () => { 
+    // .......        
+    onComplete(route)
+    // .......
+  })
+})
+````
+
+`runQueue` 执行完 `beforeResolve` 后执行 `onComplete(route)` ，也就是下面这个回调。
+调用 `updateRoute` 切换当前路由。并执行 `全局的 afterEach ` 钩子。
+
+````js
+this.confirmTransition(route, () => {
+  this.updateRoute(route)
+  onComplete && onComplete(route)
+  this.ensureURL() // 保证 url 发生变化
+  // ......
+},/*......*/)
+
+updateRoute (route: Route) {
+    const prev = this.current
+    this.current = route
+    this.cb && this.cb(route)
+    this.router.afterHooks.forEach(hook => {
+      hook && hook(route, prev)
+    })
+  }
+````
+
+接着执行 `transitionTo` 传入的 `onComplete` 回调函数，最后执行 `ensureURL` 切换 `url`。
+
+````js  
+// hash 模式的 ensureURL 方法位于 history/hash.js    
+ensureURL (push?: boolean) { 
+    const current = this.current.fullPath
+    if (getHash() !== current) {
+      push ? pushHash(current) : replaceHash(current)
+    }
+}
+ 
+function pushHash (path) {
+  if (supportsPushState) {
+    pushState(getUrl(path))
+  } else {
+    window.location.hash = path
+  }
+} 
+```` 
+
