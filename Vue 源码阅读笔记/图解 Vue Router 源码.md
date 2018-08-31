@@ -119,30 +119,68 @@ beforeCreate () {
 ```` 
 
 ## init
-`_route.init` 过程比较复杂, `init` 方法主要做了如下事情
+`_route.init` 位置 src/index.js, 从下面可以看出 `init` 逻辑只会执行一次，`app` 也就是 `根 vm ` 实例。  
 
-- 只执行一次
-
-`init` 场景下，`transitionTo` 传入的回调函数是 `setupHashListener`，监听 `url` ，当 `url` 发生变化时调用 `transitionTo` 切换路由。
- 
 ````js
-history.transitionTo(
-  history.getCurrentLocation(),
-  setupHashListener,// onComplete
-  setupHashListener
-)
+  init (app: any /* Vue component instance */) {
+    // .......
+    if (this.app) {
+      return
+    }
 
-// history/hash.js
-setupListeners () {
-  // .....
-  window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', () => {
-    // .....
-    this.transitionTo(getHash(), route => {
-      // ....
-    })
-  })
+    this.app = app
+    // .......
 }
-````
+```` 
+
+`init` 方法主要做了如下事情
+
+1. 设置 `根 vm`  为 `this.app`
+1. 调用 `transitionTo` 切换当前路由，也就是切换 `vueRouter.history.current` 
+1. 将 `setupHashListener` 作为 `transitionTo` 的 `onComplete` 回调。 `setupHashListener` 的作用是监听 `url` ，当 `url` 发生变化时调用 `transitionTo` 切换路由。 
+ 
+    ````js
+    history.transitionTo(
+      history.getCurrentLocation(),
+      setupHashListener,// onComplete
+      setupHashListener
+    )
+    
+    // history/hash.js
+    setupListeners () {
+      // .....
+      window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', () => {
+        // .....
+        this.transitionTo(getHash(), route => {
+          // ....
+        })
+      })
+    }
+    ````
+
+1. 注册 `vueRouter.history.cb`， 待以后 `transitionTo` 被调用时回调这个 `cb`。  
+
+    ````js
+    // src/index.js
+    history.listen(route => { // 设置 history.cb，在 updateRoute 的时候会执行这个 cb
+      this.apps.forEach((app) => {
+        app._route = route
+      })
+    })
+    
+    // history/base.js
+    listen (cb: Function) {
+      this.cb = cb
+    }
+ 
+    // src/history/base.js
+    // transitionTo -> confirmTransition -> updateRoute 
+    updateRoute (route: Route) {   
+      // ....
+      this.cb && this.cb(route)
+      // ....
+    }
+    ````
 
 ## transitionTo
 调用 `transitionTo` 的场景有两个，本节只介绍 `init` 情景。`history.transitionTo`，这个方法的作用是切换当前路由，也就是切换 `history.current`。定义如下
@@ -150,7 +188,6 @@ setupListeners () {
 ````js
 transitionTo (location: RawLocation, onComplete?: Function, onAbort?: Function){/*....*/}
 ````
-
 
 1. 首先调用 `this.router.match` (在上面 `new VueRouter` 的小章有提到)。`match` 方法的作用是，根据新路由的 `path` 属性从 `pathMap` 中匹配出对应的 `routeRecord`，
 然后调用 `_createRoute`
@@ -241,7 +278,7 @@ runQueue(queue, iterator, () => {
 })
 ````
 
-`runQueue` 执行完 `beforeResolve` 后执行 `onComplete(route)` ，也就是下面这个回调。调用 `updateRoute` 切换当前路由。并执行 `全局的 afterEach ` 钩子。
+`runQueue` 执行完 `beforeResolve` 后执行 `onComplete(route)` ，也就是下面这个回调。调用 `updateRoute` 切换当前路由。并执行 `全局的 afterEach ` 钩子。`this.cb` 用于视图更新，下节会详细介绍。 
 
 ````js
 this.confirmTransition(route, () => {
@@ -259,19 +296,6 @@ updateRoute (route: Route) {
       hook && hook(route, prev)
     })
   }
-````
-
-````js
-history.listen(route => { // 设置 history.cb，在 updateRoute 的时候会执行这个 cb
-  this.apps.forEach((app) => {
-    app._route = route
-  })
-})
-
-// history/base.js
-listen (cb: Function) {
-  this.cb = cb
-}
 ````
 
 接着执行 `transitionTo` 传入的 `onComplete` 回调函数(上面 init 小节提到的 `setupHashListener`) 监听 url，最后执行 `ensureURL` 切换 `url`。
