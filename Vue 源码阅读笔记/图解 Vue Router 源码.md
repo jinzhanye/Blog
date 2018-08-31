@@ -145,7 +145,7 @@ setupListeners () {
 ````
 
 ## transitionTo
-`history.transitionTo`，这个方法的作用是切换当前路由，也就是切换 `history.current`。定义如下
+调用 `transitionTo` 的场景有两个，本节只介绍 `init` 情景。`history.transitionTo`，这个方法的作用是切换当前路由，也就是切换 `history.current`。定义如下
 
 ````js
 transitionTo (location: RawLocation, onComplete?: Function, onAbort?: Function){/*....*/}
@@ -241,8 +241,7 @@ runQueue(queue, iterator, () => {
 })
 ````
 
-`runQueue` 执行完 `beforeResolve` 后执行 `onComplete(route)` ，也就是下面这个回调。
-调用 `updateRoute` 切换当前路由。并执行 `全局的 afterEach ` 钩子。
+`runQueue` 执行完 `beforeResolve` 后执行 `onComplete(route)` ，也就是下面这个回调。调用 `updateRoute` 切换当前路由。并执行 `全局的 afterEach ` 钩子。
 
 ````js
 this.confirmTransition(route, () => {
@@ -262,7 +261,20 @@ updateRoute (route: Route) {
   }
 ````
 
-接着执行 `transitionTo` 传入的 `onComplete` 回调函数，最后执行 `ensureURL` 切换 `url`。
+````js
+history.listen(route => { // 设置 history.cb，在 updateRoute 的时候会执行这个 cb
+  this.apps.forEach((app) => {
+    app._route = route
+  })
+})
+
+// history/base.js
+listen (cb: Function) {
+  this.cb = cb
+}
+````
+
+接着执行 `transitionTo` 传入的 `onComplete` 回调函数(上面 init 小节提到的 `setupHashListener`) 监听 url，最后执行 `ensureURL` 切换 `url`。
 
 ````js  
 // hash 模式的 ensureURL 方法位于 history/hash.js    
@@ -280,5 +292,4 @@ function pushHash (path) {
     window.location.hash = path
   }
 } 
-```` 
-
+````  
