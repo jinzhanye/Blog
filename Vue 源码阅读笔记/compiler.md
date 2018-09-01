@@ -141,3 +141,6 @@ export function installRenderHelpers (target: any) {
   target._g = bindObjectListeners
 }
 ````
+
+## 参考 
+[Vue.js 技术揭秘/编译](https://ustbhuangyi.github.io/vue-analysis/compile/)
