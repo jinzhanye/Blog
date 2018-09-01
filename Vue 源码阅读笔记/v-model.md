@@ -17,7 +17,7 @@ new Vue({
 });
 ````
 
-上面这个例子，`Compiler` 之后生成如下代码。可以看到 `domProps:{"value":(message)}` 与 `on:{"input": /*....*/}` 
+上面这个例子，`Compile` 之后生成如下代码。可以看到 `domProps:{"value":(message)}` 与 `on:{"input": /*....*/}` 
 
 ````js
 with(this) {
