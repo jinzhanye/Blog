@@ -13,7 +13,7 @@
 1. render 调用 createElement，createElement 方法实际上是对 _createElement 方法的封装，它允许传入的参数更加灵活，在处理这些参数后，调用真正创建 VNode 的函数 _createElement
 1. _createElement 主要做了两件事。
     1. 规范化 children
-    1. 创建 vnode。如果判断 tag 为 原生tag ，就调用 new VNode 创建 vnode。如果 tag 为 组件名tag / options / constructor 则调用 createComponent(这个函数名起得非常不好，如果改为 createComponentVNode 会更加直观) 创建组件类型 vnode (注意，这个 createComponent 不是 patch 的 那个 createComponent，并没有递归的过程，只是简单成构造一个 vnode 实例)。
+    1. 创建 vnode。如果判断 tag 为 原生tag ，就调用 new VNode 创建 vnode。如果 tag 为 组件名 tag 或者 options 或者 constructor 则调用 createComponent(这个函数名起得非常不好，如果改为 createComponentVNode 会更加直观) 创建组件类型 vnode (注意，这个 createComponent 不是 patch 的 那个 createComponent，并没有递归的过程，只是简单成构造一个 vnode 实例)。
     
 1. 回到 `vm._update`，主要是调用patch方法，并将结果保存到 `vm.$el`， `vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)`
 1. patch。顶级节点 patch 时，oldVNode 不为 undefined，执行以下步骤

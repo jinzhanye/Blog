@@ -26,6 +26,7 @@
         asyncFactory
         )
         ````
+    1. 而上面的 `children` 属性，是在 `slot` 情况下，占位符 vnode 的 子Vnode 节点。最终保存在 vnode.componentOptions.children
 
 - vnode 与 vm 的相互引用 
     - 组件vnode, vnode.componentInstance 指向vm，定义在 create-component.js componentVNodeHooks的init方法
