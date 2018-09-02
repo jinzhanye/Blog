@@ -1,5 +1,7 @@
 ## 普通插槽
 
+例子
+
 ````js
 let AppLayout = {
   template: `<div class="container">
@@ -154,6 +156,8 @@ export function resolveSlots (
     if ((child.context === context || child.fnContext === context) &&
       data && data.slot != null
     ) {
+      // 对应父组件  _c('h1',{attrs:{"slot":"header"},slot:"header"} ....
+      // slot 属性就是 name 
       const name = data.slot
       const slot = (slots[name] || (slots[name] = []))
       if (child.tag === 'template') {
