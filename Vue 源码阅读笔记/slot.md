@@ -133,7 +133,9 @@ export function renderSlot (
 
 ````js
 export function initRender (vm: Component) {
+    // ....
     vm.$slots = resolveSlots(options._renderChildren, renderContext)
+    // ....
 }
 
 export function resolveSlots (
@@ -177,7 +179,7 @@ export function resolveSlots (
 `resolveSlots` 最终获取按插槽名为 `key` 的对象。而每个属性对应的是 `VNode` 数组。
 
 ````js
-vm.$slot = {
+vm.$slots = {
  default:[VNode,VNode,VNode], // 其中两个是空白字符 VNode
  footer:[VNode],
  header:[VNode]  
