@@ -3,7 +3,7 @@
 
 1. 标识 `install.installed = true`， 确保 Vue Router 只安装一次
 1. 调用 `Vue.mixin` 把 `beforeCreate` 与 `destoryed` 钩子函数混入每个组件中。
-1. 在 Vue 原型上定义 `$router` 指向 `this._routerRoot._router`，定义 `$route` 指向 `this._routerRoot._route`
+1. 在 Vue 原型上定义 `$router` 指向 `this._routerRoot._router`，定义 `$route` 指向 `this._routerRoot._route`。这就是为什么我们可以在组件实例上可以访问 this.$router 以及 this.$route
 1. 注册 `RouterView` 与 `RouterLink` 为全局组件
 1. 定义路由中的钩子函数的合并策略，和普通的钩子函数一样
 

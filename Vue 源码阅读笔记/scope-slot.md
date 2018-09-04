@@ -183,7 +183,7 @@ Vue.prototype._render = function (): VNode {
 }
 ````
 
-`_t` 也就是 `renderSlot` ，就是从 `$scopedSlots` 中取出 `fn` 执行生成 `VNode`。
+`_t` 也就是 `renderSlot` ，就是从 `$scopedSlots` 中取出 `fn` ，然后以当前组件也就是子组件的 `props` 作为参数执行 `fn` 生成 `VNode`。
 
 ````js
 export function renderSlot (
@@ -207,11 +207,20 @@ export function renderSlot (
 }
 ````
 
-而 `fn` 也就调用 `_c` 生成 `VNode` 的，在 `initRender` 中绑定 `vm._c`，可以看到作用域是当前组件的 `vm` 实例。
+再看一次 `default` 的 `fn` ，获取到来自子组件的 `props` 进行取值。
  
 ````js
-// initRender
-vm._c = function (a, b, c, d) { return createElement(vm, a, b, c, d, false); }
+with (this) {
+    return _c('div', [_c('child', {
+        scopedSlots: _u([{
+            key: "default",
+            fn: function (props) {
+                return [_c('p', [_v("Hello from parent")]), // template 节点返回 childrenList
+                    _c('p', [_v(_s(props.text + props.msg))])]
+            }
+        },//....
+    })], 1)
+}
 ````
 
 ## 抄的总结
@@ -219,7 +228,7 @@ vm._c = function (a, b, c, d) { return createElement(vm, a, b, c, d, false); }
 - 作用域插槽，父组件在编译和渲染阶段并不会直接生成 `vnodes`，而是在父节点 `vnode` 的 `data` 中保留一个 `scopedSlots` 对象，存储着不同名称的插槽以及它们对应的渲染函数，
 只有在`子组件渲染阶段`才会执行这个渲染函数生成 `vnodes`，由于是在子组件环境执行的，所以对应的数据作用域是子组件实例。
 
-简单地说，两种插槽的目的都是让子组件 slot 占位符生成的内容由父组件来决定，但数据的作用域会根据它们 vnodes 渲染时机不同而不同。
+简单地说，两种插槽的目的都是让子组件 slot 占位符生成的内容由父组件来决定，但数据的作用域会根据它们 `vnodes` 渲染时机不同而不同。
 
 ## 参考 
 [Vue.js技术揭秘/slot](https://ustbhuangyi.github.io/vue-analysis/extend/slot.html#%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%8F%92%E6%A7%BD)

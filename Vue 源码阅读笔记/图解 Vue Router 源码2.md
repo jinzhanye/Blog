@@ -54,6 +54,14 @@ listen (cb: Function) {
 }
 ````
 
+注意，虽然 `this.current`(即`history.current`) 与 `app._route` 都是指向 `_route`，但是对 `this.current` 设值并不会触发 `setter`。因为是根 `vm` 将 `_route` 定义成响应式，`history` 对象没
+没有把 `current` 定义为响应式。 
+
+````js
+// src/install.js
+Vue.util.defineReactive(this, '_route', this._router.history.current)
+```` 
+
 ## RouterView
 
 上一篇提到，根 vm 在 `beforeCreate` 中执行完 `this._router.init` 后，会将 `_route` 变成响应式对象。
@@ -119,3 +127,11 @@ Vue.mixin({
 2. 计算 `dep` 值，通过 `dep` 值在 `route.matched` 中匹配出相应的 `RouterRecord` 对象 
 3. 调用 `parent.$createElement` 渲染 `routerRecord.component`
 4. 在 `routerRecord.component` 渲染过程中如果遇到 `RouterView` 组件，以同样的步骤进行处理
+
+## 总结 
+- 根vm 在`beforeCreate`阶段，初始化路由，监听 url 变化。定义`_route` 为响应式对象。
+- 根vm 在渲染阶段`RouterView` 触发`_route` 收集依赖。
+- 以后每次用户点击 `RouterLink` 或者 直接改变 url 时，切换当前路由，对`_route` 设值，触发`RouterView` 更新视图。
+
+## 参考
+[Vue.js技术揭秘/Vue-Router](https://ustbhuangyi.github.io/vue-analysis/vue-router/)
