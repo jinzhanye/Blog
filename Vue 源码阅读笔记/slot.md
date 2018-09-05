@@ -129,7 +129,7 @@ export function renderSlot (
 }
 ````
 
-在子组件 `AppLayout` 在 `init` 阶段需要获取 `vm.$slot` 属性， 调用链为 `init -> initRender -> resolveSlots`
+在子组件 `AppLayout` 在 `init` 阶段会获取 `vm.$slot` 属性， 调用链为 `init -> initRender -> resolveSlots`
 
 ````js
 export function initRender (vm: Component) {
@@ -183,6 +183,32 @@ vm.$slots = {
  default:[VNode,VNode,VNode], // 其中两个是空白字符 VNode
  footer:[VNode],
  header:[VNode]  
+}
+````
+
+在组件更新阶段因为不走 `init`，所以会在 `updateChildComponent` 更新 `$slot`。之所以后面还需要调用 `$forceUpdate`，是要让子组件在下次 `patch` 中 `diff` 更新。
+
+````js
+// src/core/instance/lifecycle.js
+export function updateChildComponent (
+  vm: Component,
+  propsData: ?Object,
+  listeners: ?Object,
+  parentVnode: MountedComponentVNode,
+  renderChildren: ?Array<VNode>
+) {
+  const hasChildren = !!(
+    renderChildren ||          
+    vm.$options._renderChildren ||
+    parentVnode.data.scopedSlots || 
+    vm.$scopedSlots !== emptyObject 
+  )
+
+  // ...
+  if (hasChildren) {
+    vm.$slots = resolveSlots(renderChildren, parentVnode.context)
+    vm.$forceUpdate()
+  }
 }
 ````
 
