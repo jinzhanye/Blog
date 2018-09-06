@@ -1,3 +1,26 @@
+- vm._watcher 保存着该实例的渲染 watcher，在 `$forceUpdate` 用到 
+
+````js
+export function updateChildComponent (){
+ //.....   
+ if (hasChildren) {
+     vm.$slots = resolveSlots(renderChildren, parentVnode.context)
+     vm.$forceUpdate()
+   }
+ //.....      
+}
+
+
+// lifecycle.js
+ Vue.prototype.$forceUpdate = function () {
+    const vm: Component = this
+    if (vm._watcher) {
+      vm._watcher.update()
+    }
+  }
+````
+
+
 vm._watchers 保存着该实例所有 watcher
 vm._computedWatchers 保存着所有 computed watcher 实例
 
@@ -88,6 +111,7 @@ Watcher.prototype.run = function run () {
 ````
 
 get 方法很关键
+
 ````js
 /**
  * Evaluate the getter, and re-collect dependencies.
