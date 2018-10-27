@@ -67,3 +67,16 @@
 - 服务器推送
 
 [参考](https://yuchengkai.cn/docs/zh/cs/#http-2-0)
+
+## HTTPS
+HTTP、TCP、IP, 在HTTP基础上加了SSL/TLS层  HTTP、SSL/TLS、TCP、IP
+
+- https协议需要证书
+- http是超文本传输协议，信息是明文传输，https则是具有安全性的ssl加密传输协议
+- http和https使用的是完全不同的连接方式，用的端口也不一样，前者是80，后者是443
+
+SSL（Secure Sockets Layer）安全套节字层
+TLS (Transport Layer Security) 传输层安全性协议
+
+TCP 三次握手前先进行 SSL/TLS的四次握手过程
+http://www.ruanyifeng.com/blog/2014/09/illustration-ssl.html
