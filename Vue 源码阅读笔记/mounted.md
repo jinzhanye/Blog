@@ -34,9 +34,9 @@
     1. 调用 createComponent 递归创建组件，如果返回 true，则直接 return。否则继续往下走
     1. 将 vnode 转化成真实 DOM
     1. 将当前 vnode 作为父节点，调用 createChildren 为孩子节点递归调用 createElm
-    1. 将真实 DOM 插入到父节点   
+    1. 将真实 DOM 插入到父节点
 
-patch.js/createComponent 
+patch.js/createComponent
 1. 调用 vnode.data.hook.init 方法以初始化 VueComponent
 1. 调用 initComponent 获取 vnode.elm
 1. 将 vnode.elm 插入到父节点
