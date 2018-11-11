@@ -23,3 +23,10 @@ webpack-dev-server 使用内存来存储webpack开发环境下的打包文件，
 给打包出来的文件以 hashchunk 命名，实现浏览器缓存文件(长缓存)
 设置 optimization.splitChunks.chunks = 'all' 优化代码分割
 
+### 加快打包速度
+- 并行处理loader
+    
+    HappyPack的基本原理：在webpack构建过程中，我们需要使用Loader对js，css，图片，字体等文件做转换操作，并且转换的文件数据量也是非常大的，且这些转换操作不能并发处理文件，而是需要一个个文件(Javascript 单线程限制)进行处理，HappyPack的基本原理是将这部分任务分解到多个子进程中去并行处理，子进程处理完成后把结果发送到主进程中，从而减少总的构建时间。
+    
+- 利用缓存减少打包 分离三方库与业务代码打包
+- 更新 node & webpack 版本
