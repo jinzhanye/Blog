@@ -110,9 +110,40 @@ graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
 
 你还可以使用 `mxStylesheet.putCellStyle` 为 mxStylesheet 添加样式对象。然后在添加 Cell 的时候，写在参数中。 
 
+[](https://jgraph.github.io/mxgraph/docs/images/mx_man_styles.png)
+
+```
+[stylename;|key=value;]
+```
+
+rounded 是内置样式
+
 ```js
 this.getStylesheet().putCellStyle('normalType', normalTypeStyle);
 ```
+
+例子中设置折线有一个需要注意的地方
+
+```
+// 设置拖拽线的过程出现折线，默认为直线
+    this.connectionHandler.createEdgeState = () => {
+      const edge = this.createEdge();
+      return new mxCellState(this.view, edge, this.getCellStyle(edge));
+    };
+```
+
+虽然调用 `insertEdge` 方法时已经设置了线条为折线，但是在拖拽线条过程中依然是直线。
+上面这段代码重写了 `createEdgeState` 方法，将拖动中的线条样式设置成与静态时的线条样式一致。
+
+#### 小技巧
+mxGraph 所有可设置样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html#mxConstants.STYLE_STROKECOLOR)可以查看，打开网站后可以看到以 `STYLE` 开头
+的常量就是可设置的样式。但是官方这个网站全是文字描述，根本表现不出这些样式的效果。下面教大家一个设置的小技巧，使用 [draw.io](https://www.draw.io/) 的 `Edit Style` 功能可以查看当前 Cell 样式。
+
+比如现在我想将线条的样式改成：折线、虚线、绿色、拐弯为圆角、粗3pt。在 Style 面板手动修改样式后，再点击 `Edit Style` 就可以看到对应的样式代码。
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0wstgt4a0j30ik0df3z7.jpg)
+
+注意以 `entry` 或 `exit` 开头的样式代表的是靶点，下节靶点会细说。
+
 
 
 ### 节点组合、相对坐标
@@ -174,7 +205,7 @@ graph.selectCellForEvent = function(cell)
 };
 ```
 
-这两个方法对原方法做了继承，思路都是判断如果该节点是子节点则替换成父节点去处理剩下的逻辑。
+这两个方法重写(Overwrite)了原方法，思路都是判断如果该节点是子节点则替换成父节点去处理剩下的逻辑。
 
 第一个方法 `getInitialCellForEvent` 在鼠标按下(mousedown事件，不是click事件)时触发，
 如果注释掉这段代码，不使用父节点替换，当发生拖拽时子节点会被单独拖拽，不会与父节点联动。
