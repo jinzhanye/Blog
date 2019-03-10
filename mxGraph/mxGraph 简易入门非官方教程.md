@@ -1,3 +1,5 @@
+todo 解释 cell 的概念
+
 ## 引入
 ### 使用 script 引入
 [Hello World](https://github.com/jgraph/mxgraph/blob/master/javascript/examples/helloworld.html)
@@ -219,33 +221,11 @@ graph.selectCellForEvent = function(cell)
 这个方法的作用是将 cell 设置为 `selectCell`，设置后通过 `graph.getSelectoinCell` 可获取得该节点，与 `getInitialCellForEvent` 同理，如果不使用父节点替换，
 则 `graph.getSelectoinCell` 获取到的会是子节点。
 
-### 外元素拖拽
-todo 重写这个 demo，官方的 demo 太复杂
-
-```
-    const nodeRootVertex = new mxCell('Name', new mxGeometry(0, 0, 100, 135), `node;image=${src}`);
-    const cells = graph.importCells([nodeRootVertex], x, y, target);
-    if (cells != null && cells.length > 0) {
-      graph.setSelectionCells(cells);
-    }
-```
-import cell 先 clone 再 move,先触发 move 再触发 cells_add，所以应该监听 cells_add 事件。
-
-```
-const nodeRootVertex = new mxCell('Name', new mxGeometry(x, y, 100, 135), `node;image=${src}`);
-
-const parent = graph.getDefaultParent();
-graph.addCell(nodeRootVertex, parent);
-graph.setSelectionCell(nodeRootVertex);
-```
-
 ## 项目实战
+todo 外元素拖拽直接在代码中链接到自己写的简化版 example
 
 ### 做一个节点组合
-
 下面我以项目这个节点为例，讲解一下如何组合节点
-
-![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0xkrsphwyj30cv09x3yv.jpg)
 
 ```js
     const nodeRootVertex = new mxCell('鼠标双击输入', new mxGeometry(0, 0, 100, 135), `node;image=${src}`);
@@ -265,7 +245,14 @@ graph.setSelectionCell(nodeRootVertex);
     normalTypeVertex.setConnectable(false);
 ```
 
+单单 `nodeRootVertex` 就是长这个样子。通过设置自定义的 `node` 样式与 `image` 属性设置图片路径配合完成。
 
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0xqbyl8ovj304t04tglm.jpg)
+
+因为默认情况下一个节点只能有一个文本区和一个图片区，要增加额外的文本和图片就需要组合节点。
+在这个基础上加上一个 `titleVertex` 文本节点，还有一个 `normalTypeVertex` 图片节点，最终达到这个效果
+
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0xkrsphwyj30cv09x3yv.jpg)
 
 #### 编辑内容
 下面这段代码是编辑内容比较常用的设置
@@ -351,7 +338,9 @@ graph.fireEvent(new mxEventObject('自定义事件A');
 在本项目Graph类 (`src/graph/Graph.js` ) 的 `_configCustomEvent` 方法我也实现了两个自定义了事件。
 当线条开始拖动时会触发 `EDGE_START_MOVE` 事件，当节点开始拖动时会触发 `VERTEX_START_MOVE` 事件。
 
+### 截图讲解
+
 ## 总结 
 - 使用的所有 demo
 - 知识点
-- 注意问题
+- 注意问题 style颜色要有6位
