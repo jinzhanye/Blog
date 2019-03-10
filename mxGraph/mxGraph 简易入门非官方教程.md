@@ -239,33 +239,16 @@ graph.addCell(nodeRootVertex, parent);
 graph.setSelectionCell(nodeRootVertex);
 ```
 
-### 事件
-cells_added 与 add_cells 的区别在不同的方法调用中触发
+## 项目实战
 
-事件图
-https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png
+### 做一个节点组合
 
-## 添加 Cell
-### 在画布上添加Cell
+下面我以项目这个节点为例，讲解一下如何组合节点
 
-```js
-    const parent = graph.getDefaultParent();
-    graph.getModel().beginUpdate();
-    try {
-        const v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
-        const v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30);
-        const e1 = graph.insertEdge(parent, null, '30%', v1, v2);
-    } finally {
-        graph.getModel().endUpdate();
-    }
-```
-
-### 在 Cell 里面再添加 Cell
-
-分析官方 constiuent.html demo
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0xkrsphwyj30cv09x3yv.jpg)
 
 ```js
-    const nodeRootVertex = new mxCell('Name', new mxGeometry(0, 0, 100, 135), `node;image=${src}`);
+    const nodeRootVertex = new mxCell('鼠标双击输入', new mxGeometry(0, 0, 100, 135), `node;image=${src}`);
     nodeRootVertex.vertex = true;
     
     const title = source.getAttribute('alt');
@@ -282,17 +265,26 @@ https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png
     normalTypeVertex.setConnectable(false);
 ```
 
-```js
-// Redirects selection to parent
-graph.selectCellForEvent = function(cell)
-{
-    if (this.isPart(cell))
-    {
-        cell = this.model.getParent(cell);
-    }
-    
-    mxGraph.prototype.selectCellForEvent.apply(this, arguments);
-};
+#### 编辑内容
+下面这段代码是编辑内容比较常用的设置
+
+```
+// 编辑时按回车键不换行，而是完成输入
+this.setEnterStopsCellEditing(true);
+// 编辑时按 escape 后完成输入
+mxCellEditor.prototype.escapeCancelsEditing = false;
+// 失焦时完成输入
+mxCellEditor.prototype.blurEnabled = true;
 ```
 
-重点说说这段代码
+默认情况下输入内容时如果按回车键内容会换行，但有些业务场景禁止换行只需要单行显示，通过这行代码 `graph.setEnterStopsCellEditing(true)` 设置可以满足需求。
+
+重点说说这句 `mxCellEditor.prototype.blurEnabled`。默认情况下如果用户在输入内容时鼠标点击了画布之外的不可聚焦区域(div、section、article等)，节点内的编辑器是不会失焦的，
+这导致了 `LABEL_CHANGED` 事件不会被触发。但在实际项目开发中一般我们会期望，如果用户在输入内容时鼠标点击了画布之外的地方就应该算作一次完成，然后通过被触发的 `LABEL_CHANGED` 事件将修改后的内容同步到服务端。
+通过 `mxCellEditor.prototype.blurEnabled = true` 这行代码设置可以满足我们的需求。
+
+### 事件
+cells_added 与 add_cells 的区别在不同的方法调用中触发
+
+事件图
+https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png
