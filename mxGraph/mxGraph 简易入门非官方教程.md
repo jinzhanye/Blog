@@ -277,11 +277,29 @@ mxCellEditor.prototype.escapeCancelsEditing = false;
 mxCellEditor.prototype.blurEnabled = true;
 ```
 
-默认情况下输入内容时如果按回车键内容会换行，但有些业务场景禁止换行只需要单行显示，通过这行代码 `graph.setEnterStopsCellEditing(true)` 设置可以满足需求。
+默认情况下输入内容时如果按回车键内容会换行，但有些业务场景禁止换行，回车表示完成输入，通过这行代码 `graph.setEnterStopsCellEditing(true)` 设置可以满足需求。
 
 重点说说这句 `mxCellEditor.prototype.blurEnabled`。默认情况下如果用户在输入内容时鼠标点击了画布之外的不可聚焦区域(div、section、article等)，节点内的编辑器是不会失焦的，
-这导致了 `LABEL_CHANGED` 事件不会被触发。但在实际项目开发中一般我们会期望，如果用户在输入内容时鼠标点击了画布之外的地方就应该算作一次完成，然后通过被触发的 `LABEL_CHANGED` 事件将修改后的内容同步到服务端。
+这导致了 `LABEL_CHANGED` 事件不会被触发。但在实际项目开发中一般我们会期望，如果用户在输入内容时鼠标点击了画布之外的地方就应该算作完成一次输入，然后通过被触发的 `LABEL_CHANGED` 事件将修改后的内容同步到服务端。
 通过 `mxCellEditor.prototype.blurEnabled = true` 这行代码设置可以满足我们的需求。
+
+#### 可换行显示的 label
+````
+const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
+      0.1, 0.65, 80, 16,
+      'constituent=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontColor=#e6a23c',
+      true);
+````
+
+对于非输入的文本内容，默认情况下即便文本超出容器宽度也是不会换行的。我们项目中宽度为80的 `titleVertex` 正是这样一个例子。
+
+![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmmixmizj30lg095abj.jpg)
+
+要设置换行需要做两件事，
+第一是通过这行代码 `graph.setHtmlLabels(true)`，使用 html 渲染文本
+第二是像上面的 `titleVertex` 的样式设置一样，添加一句 `whiteSpace=wrap`
+
+![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmcy67uaj30mj0fedj4.jpg)
 
 ### 事件
 cells_added 与 add_cells 的区别在不同的方法调用中触发
