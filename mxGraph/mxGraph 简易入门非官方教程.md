@@ -304,10 +304,54 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmcy67uaj30mj0fedj4.jpg)
 
 ### 事件
-cells_added 与 add_cells 的区别在不同的方法调用中触发
 
-事件图
-https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png
+![](https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png)
+
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0xo1ow1p0j30id010gls.jpg)
+- 添加cell的时候会触发两个事件 `ADD_CELLS`、`CELLS_ADDED`， 先触发 `CELLS_ADDED` 后触发 `ADD_CELLS`。
+- `ADD_CELLS`、`CELLS_ADDED` 的区别，`ADD_CELLS` 在 `addCells` 方法中触发，而 `CELLS_ADDED` 在 `cellsAdded` 方法中触发。
+而对于 `addCells` 与 `cellsAdded` 官方文档也只是两个句的说明，体现不出多大区别，对于这两个方法的本质区别我还存有疑惑。
+但按经验而言后触发的事件会携带更多的信息，所以平时开发我会监听`ADD_CELLS` 事件。
+
+- 判断一个节点/线被添加
+
+从图中我们可以看到，`insertVertex`、`insertEdge` 最终都被当作 `Cell` 处理，在后续触发的事件也没有对节点/线条进行区分，而是统一当作 `Cell` 事件。
+所以对于一个 `Cell` 添加事件，需要自己区别是添加了节点还是添加了条线。
+
+```
+      graph.addListener(mxEvent.CELLS_ADDED, (sender, evt) => {
+        const cell = evt.properties.cells[0];
+        if (graph.isPart(cell)) {
+          return;
+        }
+
+        if (cell.vertex) {
+          this.$message.info('添加了一个节点');
+        } else if (cell.edge) {
+          this.$message.info('添加了一条线');
+        }
+      });
+```
+
+还有就是对于子节点添加到父节点的情况(如上面提到的将 `titleVertex` 、`normalTypeVertex` 添加到 `nodeRootVertex`)也是会触发 `Cell` 添加事件的。通常对于这些
+子节点不作处理，可以像 `consti.html` 那个例子一样用一个 `isPart` 判断过滤掉。
+ 
+
+
+- 自定义事件
+
+mxGraph 提供自定义事件功能，使用 fireEvent 与 mxEventObject TODO 加文档外链。下面代码是一个最简单的例子
+
+```
+graph.addListener('自定义事件A',()=>{
+  // do something .....
+});
+// 触发自定义事件
+graph.fireEvent(new mxEventObject('自定义事件A');
+```
+
+在本项目Graph类 (`src/graph/Graph.js` ) 的 `_configCustomEvent` 方法我也实现了两个自定义了事件。
+当线条开始拖动时会触发 `EDGE_START_MOVE` 事件，当节点开始拖动时会触发 `VERTEX_START_MOVE` 事件。
 
 ## 总结 
 - 使用的所有 demo
