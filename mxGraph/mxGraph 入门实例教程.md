@@ -17,6 +17,7 @@
 这篇教程分为两部分，第一部分主要结合官网的例子讲解一些基础知识。第二部分是利用第一部分讲到的知识开发一个小项目 [pokemon-diagram](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)
 
 todo 解释 cell 的概念
+todo 补充项目文档
 
 ## 引入
 ### 使用 script 引入
@@ -319,7 +320,82 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmcy67uaj30mj0fedj4.jpg)
 
+### Model
+现在介绍一个概念 Model，Model 代表的是当前图形的数据结构化表示。mxGraphModel 封装了 Model 的相关操作。
+
+你可以启动项目，画一个这样的图
+
+![](https://ws3.sinaimg.cn/large/006tKfTcgy1g0xy1zmmqrj30f10gb0tn.jpg)
+
+导出之后应该等到这样一份 xml
+
+```
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="4" value="男1号" style="node;image=/static/images/ele/ele-005.png" vertex="1" parent="1">
+      <mxGeometry x="350" y="50" width="100" height="135" as="geometry"/>
+      <Object normalType="water.png" as="data">
+        <Object id="5" icon="ele-005.png" title="智爷" as="element"/>
+      </Object>
+    </mxCell>
+    ...........
+  </root>
+</mxGraphModel>
+```
+
+这份 xml 就是当前图形的 model 的结构化表示，也就是当前 model。为了方便观察，我手动格式化“男1号”这个节点 
+
+```xml
+<mxCell 
+  id="4"
+  value="男1号" 
+  style="node;image=/static/images/ele/ele-005.png"
+  vertex="1" 
+  parent="1">
+  <mxGeometry 
+    x="400" 
+    y="70" 
+    width="100" 
+    height="135" 
+    as="geometry"/>
+  <Object 
+    as="data"
+    normalType="">
+    <Object 
+      as="element"
+      id="5" 
+      icon="ele-005.png" 
+      title="智爷" />
+  </Object>
+</mxCell>
+```
+
+这样一看，这份数据与下面的对象本质上是不是同一个东西
+
+```
+id: "3"
+mxObjectId: "mxCell#31"
+parent: mxCell
+children: (2) [mxCell, mxCell]
+data: {element: {…}, normalType: ""}
+geometry: mxGeometry {x: 0, y: 0, width: 100, height: 135}
+mxObjectId: "mxCell#30"
+style: "node;image=/static/images/ele/ele-005.png"
+value: "鼠标双击输入"
+vertex: true
+__proto__: Object
+source: null
+style: "normalType;constituent=1;fillColor=none;image=/static/images/normal-type/forest.png"
+target: null
+value: null
+vertex: true
+```
+
 ### 事件
+
+todo 补充 select 事件
 
 ![](https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png)
 
