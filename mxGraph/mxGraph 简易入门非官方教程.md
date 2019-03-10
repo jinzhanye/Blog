@@ -333,10 +333,8 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
       });
 ```
 
-还有就是对于子节点添加到父节点的情况(如上面提到的将 `titleVertex` 、`normalTypeVertex` 添加到 `nodeRootVertex`)也是会触发 `Cell` 添加事件的。通常对于这些
-子节点不作处理，可以像 `consti.html` 那个例子一样用一个 `isPart` 判断过滤掉。
- 
-
+还有就是对于子节点添加到父节点的情况(如上面提到的将 `titleVertex` 、`normalTypeVertex` 添加到 `nodeRootVertex`)也是会触发 `Cell` 添加事件的。
+通常对于这些子节点不作处理，可以像 `consti.html` 那个例子一样用一个 `isPart` 判断过滤掉。
 
 - 自定义事件
 
