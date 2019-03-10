@@ -1,3 +1,21 @@
+在一篇文章 XX 中，提到了我为什么要去学习 mxGraph。在我入门时遇到了以下几个问题
+
+- 官方文档偏向理论，没能较好地结合代码进行讲解。
+- 虽然官方给出的例子很多，但没有说明阅读顺序，对于那里刚入门的我也不知道应该从哪开始阅读。
+- 通过搜索引擎搜索 “mxGraph教程” 也没有得到太大帮助。
+
+通过自己死磕了一段时间并在公司项目中进行实践后，慢慢开始掌握这个框架的使用。
+
+[官方](https://jgraph.github.io/mxgraph/)列了比较多文档，其中下面这几份是比较有用的
+
+- [mxGraph Tutorial](https://jgraph.github.io/mxgraph/docs/tutorial.html)，这份文档主要讲述整个框架的组成，在搜索引擎搜索“mxGraph教程”，一般得出的结果是这份文档的中文翻译
+- [mxGraph User Manual – JavaScript Client](https://jgraph.github.io/mxgraph/docs/manual.html)，这份文档对一些重要的概念进行讲解，以及介绍一些重要的 API 
+- [在线实例](https://jgraph.github.io/mxgraph/javascript/index.html)，这些实例的代码都在[源码库](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)有
+- [API 文档](https://jgraph.github.io/mxgraph/docs/js-api/files/index-txt.html)，这是最重要的一份文档，在接下来的教程我不会对接口作详细讲述，你可以在这里对相关接口作深入了解
+
+在看完我的文章后希望进一步学习可以去阅读这些文档，现在可以暂时不看。因为刚开始就堆这么多理论性的东西，对入门没有好处。
+这篇教程分为两部分，第一部分主要结合官网的例子讲解一些基础知识。第二部分是利用第一部分讲到的知识开发一个小项目 [pokemon-diagram](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)
+
 todo 解释 cell 的概念
 
 ## 引入
