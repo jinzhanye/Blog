@@ -142,9 +142,13 @@ mxGraph 所有可设置样式在[这里](https://jgraph.github.io/mxgraph/docs/j
 比如现在我想将线条的样式改成：折线、虚线、绿色、拐弯为圆角、粗3pt。在 Style 面板手动修改样式后，再点击 `Edit Style` 就可以看到对应的样式代码。
 ![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0wstgt4a0j30ik0df3z7.jpg)
 
-注意以 `entry` 或 `exit` 开头的样式代表的是靶点，下节靶点会细说。
+### anchor
 
+注意以 `entry` 或 `exit` 开头的样式代表的是靶点，请参考 anchor 例子。
 
+可以看到如果不设置靶点，当节点被拖拽后 mxGraph 会智能地更换线条的出入的方向，而设置靶点样式后线条出入口就固定了。
+
+// TODO 修改官方 anchor.html demo 加图片说明
 
 ### 节点组合、相对坐标
 
@@ -214,6 +218,32 @@ graph.selectCellForEvent = function(cell)
 通过 debugger 进去 `getInitialCellForEvent` 可以得知，第二个方法 `selectCellForEvent` 其实是 `getInitialCellForEvent` 内部调用的一个方法。
 这个方法的作用是将 cell 设置为 `selectCell`，设置后通过 `graph.getSelectoinCell` 可获取得该节点，与 `getInitialCellForEvent` 同理，如果不使用父节点替换，
 则 `graph.getSelectoinCell` 获取到的会是子节点。
+
+### 外元素拖拽
+todo 重写这个 demo，官方的 demo 太复杂
+
+```
+    const nodeRootVertex = new mxCell('Name', new mxGeometry(0, 0, 100, 135), `node;image=${src}`);
+    const cells = graph.importCells([nodeRootVertex], x, y, target);
+    if (cells != null && cells.length > 0) {
+      graph.setSelectionCells(cells);
+    }
+```
+import cell 先 clone 再 move,先触发 move 再触发 cells_add，所以应该监听 cells_add 事件。
+
+```
+const nodeRootVertex = new mxCell('Name', new mxGeometry(x, y, 100, 135), `node;image=${src}`);
+
+const parent = graph.getDefaultParent();
+graph.addCell(nodeRootVertex, parent);
+graph.setSelectionCell(nodeRootVertex);
+```
+
+### 事件
+cells_added 与 add_cells 的区别在不同的方法调用中触发
+
+事件图
+https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png
 
 ## 添加 Cell
 ### 在画布上添加Cell
