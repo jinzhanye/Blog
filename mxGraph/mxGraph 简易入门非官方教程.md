@@ -265,6 +265,8 @@ graph.setSelectionCell(nodeRootVertex);
     normalTypeVertex.setConnectable(false);
 ```
 
+
+
 #### 编辑内容
 下面这段代码是编辑内容比较常用的设置
 
@@ -291,13 +293,13 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
       true);
 ````
 
-对于非输入的文本内容，默认情况下即便文本超出容器宽度也是不会换行的。我们项目中宽度为80的 `titleVertex` 正是这样一个例子。
+对于非输入的文本内容，默认情况下即便文本超出容器宽度也是不会换行的。我们项目中宽度为80的 titleVertex 正是这样一个例子。
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmmixmizj30lg095abj.jpg)
 
 要设置换行需要做两件事，
-第一是通过这行代码 `graph.setHtmlLabels(true)`，使用 html 渲染文本
-第二是像上面的 `titleVertex` 的样式设置一样，添加一句 `whiteSpace=wrap`
+第一是通过这行代码 `graph.setHtmlLabels(true)`，使用 html 渲染文本(mxGraph 默认使用 svg的text 标签渲染文本)
+第二是像上面的 titleVertex 的样式设置一样，添加一句 `whiteSpace=wrap`
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmcy67uaj30mj0fedj4.jpg)
 
@@ -306,3 +308,8 @@ cells_added 与 add_cells 的区别在不同的方法调用中触发
 
 事件图
 https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png
+
+## 总结 
+- 使用的所有 demo
+- 知识点
+- 注意问题
