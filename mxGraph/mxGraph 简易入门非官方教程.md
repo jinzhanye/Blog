@@ -254,6 +254,17 @@ todo 外元素拖拽直接在代码中链接到自己写的简化版 example
 
 ![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0xkrsphwyj30cv09x3yv.jpg)
 
+
+有时需要为不同子节点设置不同的鼠标悬浮图标，可以参考 xxx，通过一个自定义的标识实现这个
+
+```
+const setCursor = () => {
+  graph.getCursorForCell = (cell) => {
+    return cell.style.includes('normalType') ? 'pointer' : 'default';
+  };
+};
+```
+
 #### 编辑内容
 下面这段代码是编辑内容比较常用的设置
 
@@ -338,7 +349,47 @@ graph.fireEvent(new mxEventObject('自定义事件A');
 在本项目Graph类 (`src/graph/Graph.js` ) 的 `_configCustomEvent` 方法我也实现了两个自定义了事件。
 当线条开始拖动时会触发 `EDGE_START_MOVE` 事件，当节点开始拖动时会触发 `VERTEX_START_MOVE` 事件。
 
-### 截图讲解
+### 导出图片
+导出图片可以使用 `mxImageExport` 这个类实现，[官方文档](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxImageExport-js.html#mxImageExport.mxImageExport)
+也有一段可以使用拿出使用的代码。
+
+```
+var xmlDoc = mxUtils.createXmlDocument();
+var root = xmlDoc.createElement('output');
+xmlDoc.appendChild(root);
+
+var xmlCanvas = new mxXmlCanvas2D(root);
+var imgExport = new mxImageExport();
+imgExport.drawState(graph.getView().getState(graph.model.root), xmlCanvas);
+
+var bounds = graph.getGraphBounds();
+var w = Math.ceil(bounds.x + bounds.width);
+var h = Math.ceil(bounds.y + bounds.height);
+
+var xml = mxUtils.getXml(root);
+new mxXmlRequest('export', 'format=png&w=' + w +
+     '&h=' + h + '&bg=#F9F7ED&xml=' + encodeURIComponent(xml))
+     .simulate(document, '_blank');
+```
+
+但这段代码会将整块画布截图，而不是以最左上角的元素及最右下角的元素作为边界截图。如果你有以元素作为边界的需求，
+则需要调用 `xmlCanvas.translate` 调整裁图边界。
+
+```
+//.....
+var xmlCanvas = new mxXmlCanvas2D(root);
+xmlCanvas.translate(
+      Math.floor((border / scale - bounds.x) / scale),
+      Math.floor((border / scale - bounds.y) / scale),
+    );
+//.....
+```
+
+加上上面的代码后就可以达到以最左上角的元素及最右下角的元素作为边界的截图效果。可以参考 Graph 类的 exportPicXML 方法
+
+todo 补充java截图代码
+
+如果图片生成失败，请使用 png 或 jpg 格式。
 
 ## 总结 
 - 使用的所有 demo
