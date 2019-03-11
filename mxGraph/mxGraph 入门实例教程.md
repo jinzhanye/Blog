@@ -16,9 +16,19 @@
 在看完我的文章后希望进一步学习可以去阅读这些文档，现在可以暂时不看。因为刚开始就堆这么多理论性的东西，对入门没有好处。
 这篇教程分为两部分，第一部分主要结合官网的例子讲解一些基础知识。第二部分是利用第一部分讲到的知识开发一个小项目 [pokemon-diagram](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)
 
-todo 特点，使用面向对象的方式使用，大量重写
-todo 解释 cell 的概念
-todo 补充项目文档
+### 面向对象
+mxGraph 框架的特点是使用面向对象的方式进行编程，所以在接下来的例子你会看到大量这种形式的方法重写(Overwrite)
+
+```
+const oldBar =  mxFoo.prototype.bar;
+mxFoo.prototype.bar = function (...args)=>{
+   // do something ....
+   return oldBar.apply(this,args);
+};
+```
+
+### Cell
+`Cell` 在 mxGraph 中可以代表`组(Group)`、`节点(Vertex)`、`边(Edge)`，`mxCell` 这个类封装了 `Cell` 的操作，本教程不涉及到`组`的内容。下方若出现 `Cell` 字眼可以当作 `节点(Vertex)` 或 `边(Edge)`
 
 ## 引入
 ### 使用 script 引入
@@ -125,6 +135,30 @@ graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
 
 你可以试着把这两个方法从代码中删掉，程序还是可以正常运行。
 
+#### insertVertex 原理
+
+```
+mxGraph.prototype.insertVertex = function(parent, id, value,
+                                          x, y, width, height, style, relative) {
+
+  // 设置 Cell 尺寸及位置信息
+  var geometry = new mxGeometry(x, y, width, height);
+  geometry.relative = (relative != null) ? relative : false;
+
+  // 创建一个 Cell
+  var vertex = new mxCell(value, geometry, style);
+  // ...
+  // 标识这个 Cell 是一个节点
+  vertex.setVertex(true);
+  // ...
+
+  // 在画布上添加这个 Cell
+  return this.addCell(vertex, parent);
+};
+```
+
+`insertEdge` 与 `insertVertex` 类似，中间过程会调用 `vertex.setEdge(true)` 将 `cell` 标记为线条
+
 ### style 的两种方式，小技巧
 
 `mxStylesheet` 默认情况下有两个属性 defaultEdgeStyle 、defaultVertexStyle。
@@ -164,27 +198,47 @@ mxGraph 所有可设置样式在[这里](https://jgraph.github.io/mxgraph/docs/j
 比如现在我想将线条的样式改成：折线、虚线、绿色、拐弯为圆角、粗3pt。在 Style 面板手动修改样式后，再点击 `Edit Style` 就可以看到对应的样式代码。
 ![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0wstgt4a0j30ik0df3z7.jpg)
 
-### anchor
 
-注意以 `entry` 或 `exit` 开头的样式代表的是靶点，请参考 anchor 例子。
+### 定位
 
-可以看到如果不设置靶点，当节点被拖拽后 mxGraph 会智能地更换线条的出入的方向，而设置靶点样式后线条出入口就固定了。
+```
+function mxGeometry(x,y,width,height)
+```
 
-// TODO 修改官方 anchor.html demo 加图片说明
+`mxGeometry` 这个类用于设置 `Cell` 的位置及宽高信息，下面通过这个 例子 todo 加链接，说明如何给 `Cell` 定位
 
-### 节点组合、相对坐标
+todo 加图片
 
-width、height 等以像素为单位
+- relative 为 false 节点
 
-坐标系 左上 0,0
+使用 `mxGraph.insertVertex` 会创建一个 `mxGeometry.relative` 为 false 的节点，这里节点以左上角为基点相对于画布定位，如 A 节点那个例子。
 
-https://jgraph.github.io/mxgraph/docs/images/mx_man_rel_vert_pos.png
+- relative 为 true 的节点
 
-https://jgraph.github.io/mxgraph/docs/images/mx_man_non_relative_pos.png
+使用 `mxGraph.insertVertex` 会创建一个 relative 为 false 的节点。如果你要将一个节点添加到另一个节点中需要在该方法调用的第9个参数传入 true，将 relative 设置为 true。
+这里子节点使用相对坐标系，以父节点左上角作为基点，x、y 取值范围都是 \[-1,1]
 
-默认情况下创建一个 relative 为 false 的节点，所以组合节点时需要将 relative 为 true
+![](https://jgraph.github.io/mxgraph/docs/images/mx_man_rel_vert_pos.png)
 
-默认情况下创建一条 relative 为 true 的线条
+- relative为 true 的线条
+
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0z65fc7a7j308v063dft.jpg)
+
+使用 `mxGraph.insertEdge` 会创建一条 relative 为 true 的线条。x、y 用于定位线条上的 label，
+x 取值范围是 [-1,1]，-1 为起点，0 为中点，1 为终点。y 表示线条的正交线距离。
+
+
+```
+const e1 = graph.insertEdge(parent, null, '30%', v1, v2);
+// relative position，以线条中点为中心
+e1.geometry.offset = new mxPoint(50, 20); // label 位置向右偏移50px，向下偏移30px，默认 null
+e1.geometry.x = -0.5; // [-1,1] 调整 label 沿连接线的位置
+e1.geometry.y = 30; // 调整label 在正交线上的距离
+```
+
+mxGoemery
+
+### 节点组合
 
 我说一下 constituent 这个例子，值得注意的几个地方
 
@@ -240,6 +294,20 @@ graph.selectCellForEvent = function(cell)
 通过 debugger 进去 `getInitialCellForEvent` 可以得知，第二个方法 `selectCellForEvent` 其实是 `getInitialCellForEvent` 内部调用的一个方法。
 这个方法的作用是将 cell 设置为 `selectCell`，设置后通过 `graph.getSelectoinCell` 可获取得该节点，与 `getInitialCellForEvent` 同理，如果不使用父节点替换，
 则 `graph.getSelectoinCell` 获取到的会是子节点。
+
+### anchor
+
+注意以 `entry` 或 `exit` 开头的样式代表的是靶点，请参考 anchor 例子。
+
+// TODO 修改官方 anchor.html demo 加图片说明
+A->B
+C->D
+E->F
+
+可以看到如果不设置靶点，当节点被拖拽后 mxGraph 会智能地更换线条的出入的方向，而设置靶点样式后线条出入口就固定了。
+
+默认情况下，可以从图形中心拖出线条，这时线条的 `exit` 为空，mxGraph 会智能地调整线条出口方向。而从图形的靶点拖出线条，则 `exit` 为固定值，连接线条后，拖拽图形，mxGraph 不会调整线条出口方向。
+入口情况同理。
 
 ## 项目实战
 todo 外元素拖拽直接在代码中链接到自己写的简化版 example
