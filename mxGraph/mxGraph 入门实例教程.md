@@ -16,6 +16,7 @@
 在看完我的文章后希望进一步学习可以去阅读这些文档，现在可以暂时不看。因为刚开始就堆这么多理论性的东西，对入门没有好处。
 这篇教程分为两部分，第一部分主要结合官网的例子讲解一些基础知识。第二部分是利用第一部分讲到的知识开发一个小项目 [pokemon-diagram](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)
 
+todo 特点，使用面向对象的方式使用，大量重写
 todo 解释 cell 的概念
 todo 补充项目文档
 
@@ -395,15 +396,25 @@ vertex: true
 
 ### 事件
 
-todo 补充 select 事件
+本项目用到事件监听写在 AppCanvas.vue 的 _listenEvent 方法，
 
 ![](https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png)
 
 ![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0xo1ow1p0j30id010gls.jpg)
+
+#### 监听事件
+
+`mxGraph` 类继承自 `mxEventSource` 类，使用父亲 `addListener` 方法可以将自身当作一个事件中心订阅/广播事件。
+
+`graph.getSelectionModel()` 返回一个 `mxGraphSelectionModel` 对象，这个对象有 `mxEvent.UNDO、mxEvent.CHANGE` 两个事件，
+通过监听 `mxEvent.CHANGE` 事件可以获取当前被选中的 `Cell`
+
+#### 区别
+
 - 添加cell的时候会触发两个事件 `ADD_CELLS`、`CELLS_ADDED`， 先触发 `CELLS_ADDED` 后触发 `ADD_CELLS`。
 - `ADD_CELLS`、`CELLS_ADDED` 的区别，`ADD_CELLS` 在 `addCells` 方法中触发，而 `CELLS_ADDED` 在 `cellsAdded` 方法中触发。
 而对于 `addCells` 与 `cellsAdded` 官方文档也只是两个句的说明，体现不出多大区别，对于这两个方法的本质区别我还存有疑惑。
-但按经验而言后触发的事件会携带更多的信息，所以平时开发我会监听`ADD_CELLS` 事件。
+但按经验而言后触发的事件会携带更多的信息，所以平时开发我会监听`ADD_CELLS` 事件。`MOVE_CELLS、CELLS_MOVED`、`REMOVE_CELLS、CELLS_REMOVED` 等事件与此类似。
 
 - 判断一个节点/线被添加
 
@@ -428,7 +439,7 @@ todo 补充 select 事件
 还有就是对于子节点添加到父节点的情况(如上面提到的将 `titleVertex` 、`normalTypeVertex` 添加到 `nodeRootVertex`)也是会触发 `Cell` 添加事件的。
 通常对于这些子节点不作处理，可以像 `consti.html` 那个例子一样用一个 `isPart` 判断过滤掉。
 
-- 自定义事件
+#### 自定义事件
 
 mxGraph 提供自定义事件功能，使用 fireEvent 与 mxEventObject TODO 加文档外链。下面代码是一个最简单的例子
 
@@ -488,4 +499,4 @@ todo 补充java截图代码
 ## 总结 
 - 使用的所有 demo
 - 知识点
-- 注意问题 style颜色要有6位
+- 注意问题 style颜色要有6位、- 左上边界搞不定
