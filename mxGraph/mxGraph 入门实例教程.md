@@ -1,40 +1,25 @@
-在一篇文章 XX 中，提到了我为什么要去学习 mxGraph。在我入门时遇到了以下几个问题
+在一篇文章 [《记一次绘图框架技术选型: jsPlumb VS mxGraph》](https://segmentfault.com/a/1190000018371243) 中，提到了我为什么要去学习 mxGraph。在入门时我遇到了以下几个问题
 
 - 官方文档偏向理论，没能较好地结合代码进行讲解。
 - 虽然官方给出的例子很多，但没有说明阅读顺序，对于那里刚入门的我也不知道应该从哪开始阅读。
 - 通过搜索引擎搜索 “mxGraph教程” 也没有得到太大帮助。
 
-通过自己死磕了一段时间并在公司项目中进行实践后，慢慢开始掌握这个框架的使用。
+通过自己对着官司文档死磕了一段时间并在公司项目中进行实践后，慢慢开始掌握这个框架的使用。下面我就根据我的学习经验写一篇比较适合入门的文章。
 
 [官方](https://jgraph.github.io/mxgraph/)列了比较多文档，其中下面这几份是比较有用的
 
 - [mxGraph Tutorial](https://jgraph.github.io/mxgraph/docs/tutorial.html)，这份文档主要讲述整个框架的组成，在搜索引擎搜索“mxGraph教程”，一般得出的结果是这份文档的中文翻译
 - [mxGraph User Manual – JavaScript Client](https://jgraph.github.io/mxgraph/docs/manual.html)，这份文档对一些重要的概念进行讲解，以及介绍一些重要的 API 
-- [在线实例](https://jgraph.github.io/mxgraph/javascript/index.html)，这些实例的代码都在[源码库](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)有
+- [在线实例](https://jgraph.github.io/mxgraph/javascript/index.html)，这些实例的源码都在[这里](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)有
 - [API 文档](https://jgraph.github.io/mxgraph/docs/js-api/files/index-txt.html)，这是最重要的一份文档，在接下来的教程我不会对接口作详细讲述，你可以在这里对相关接口作深入了解
 
-在看完我的文章后希望进一步学习可以去阅读这些文档，现在可以暂时不看。因为刚开始就堆这么多理论性的东西，对入门没有好处。
-这篇教程分为两部分，第一部分主要结合官网的例子讲解一些基础知识。第二部分是利用第一部分讲到的知识开发一个小项目 [pokemon-diagram](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)
+在看完我的文章后希望系统地学习 mxGraph 还是要去阅读这些文档的，现在可以暂时不看。因为刚开始就堆这么多理论性的东西，对入门没有好处。
 
-### 面向对象
-mxGraph 框架的特点是使用面向对象的方式进行编程，所以在接下来的例子你会看到大量这种形式的方法重写(Overwrite)
-
-```
-const oldBar =  mxFoo.prototype.bar;
-mxFoo.prototype.bar = function (...args)=>{
-   // do something ....
-   return oldBar.apply(this,args);
-};
-```
-
-### Cell
-`Cell` 在 mxGraph 中可以代表`组(Group)`、`节点(Vertex)`、`边(Edge)`，`mxCell` 这个类封装了 `Cell` 的操作，本教程不涉及到`组`的内容。下方若出现 `Cell` 字眼可以当作 `节点(Vertex)` 或 `边(Edge)`
+这篇教程分为两部分，第一部分主要结合[官网的例子](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)讲解一些基础知识。第二部分则利用第一部分讲解的知识开发一个小项目 [pokemon-diagram](https://github.com/jinzhanye/pokemon-diagram)。本教程会使用到 ES6 语法，而第二部分的项目是用 Vue 写的。阅读本教程需要你会这两项预备知识。
 
 ## 引入
 ### 使用 script 引入
-[Hello World](https://github.com/jgraph/mxgraph/blob/master/javascript/examples/helloworld.html)
-
-我们先来分析一下官方是怎样通过 script 标签引入 mxGraph 的
+我们来分析一下官方的 [HelloWorld](https://github.com/jgraph/mxgraph/blob/master/javascript/examples/helloworld.html) 实例是怎样通过 script 标签引入 mxGraph 的
 
 ```html
 <!DOCTYPE html>
@@ -53,21 +38,28 @@ mxBasePath = '../src';
 </script>
 
 <script src="../src/js/mxClient.js"></script>
+<script>
+	// ......
+</script>
 </html>
 ```
 
 首先要声名一个全局变量 `mxBasePath` 指向一个路径，然后引入 mxGraph。
 
-`mxBasePaht` 指向的路径作为 mxGraph 的静态资源路径，这些资源除了 `js目录` ，其他目录下的资源都是 mxGraph 运行过程中所需要的，所以要在引入 mxGraph 前先设置 `mxBasePaht`。 
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g108oivvzmj305s03e3yg.jpg)
+
+`mxBasePath` 指向的路径作为 mxGraph 的静态资源路径。上图是 HelloWorld 项目的 `mxBasePah`，这些资源除了 js 目录 ，其他目录下的资源都是 mxGraph 运行过程中所需要的，所以要在引入 mxGraph 前先设置 `mxBasePaht`。 
+
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g108qwr0ylj306i0dhaaj.jpg)
 
 再来看看 javascript 目录下有两个 `mxClient.js` 版本。 一个在 `javascript/src/js/mxClient.js` ，另一个在 `javascript/mxClient.js`，后者是前者后的版本。
-所以两者可以替换使用的，如果你的项目是使用script标签引入 mxGraph，可以参考我的引入方式。
+所以两者可以替换使用的。如果你的项目是使用 script 标签引入 mxGraph，可以参考[我这个库](https://github.com/jinzhanye/learn-mxgraph/blob/master/demo/01.helloworld.html)
 
 ### 模块化引入
-模块化引入可以直接参考我的项目，static/mxgraph
+模块化引入可以直接参考我的项目的这个文件 [static/mxgraph/index.js](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/index.js)
 
 ```js
-// 引入 mxgraph
+/*** 引入 mxgraph ***/
 // src/graph/index.js
 import mx from 'mxgraph';
 
@@ -75,7 +67,7 @@ const mxgraph = mx({
   mxBasePath: '/static/mxgraph',
 });
 
-// decode bug https://github.com/jgraph/mxgraph/issues/49
+//fix BUG https://github.com/jgraph/mxgraph/issues/49
 window['mxGraph'] = mxgraph.mxGraph;
 window['mxGraphModel'] = mxgraph.mxGraphModel;
 window['mxEditor'] = mxgraph.mxEditor;
@@ -87,7 +79,8 @@ window['mxDefaultToolbar'] = mxgraph.mxDefaultToolbar;
 
 export default mxgraph;
 
-// 在其他模块中使用
+
+/*** 在其他模块中使用 ***/
 // src/graph/Graph.js
 import mxgraph from './index';
 
@@ -100,20 +93,33 @@ const {
 } = mxgraph;
 ```
 
-有两点需要特别注意的
+这里有两点需要特别注意的
 
-`mxBasePath` 指向的路径一定要是一个可以通过url访问的静态资源目录。
-比如说我项目的 static 目录下有 `mxgraph/css/common.css` 这么个资源，我的项目部署在 `http://localhost:7777`，那么 `http://localhost:7777/static/mxgraph/css/common.css` 应该是可以访问才对。
+- `mx` 方法传入的配置项 `mxBasePath` 指向的路径一定要是一个可以通过url访问的静态资源目录。举个例子，
+我项目的 static 目录是个静态资源目录，该目录下有 `mxgraph/css/common.css` 这么个资源，通过`http://localhost:7777` 可以访问我的应用，那么通过 `http://localhost:7777/static/mxgraph/css/common.css` 也应该是可以访问 `common.css` 才对
 
-还有就是有一段绑定全局变量的代码，如果你在通过 script标签引入 mxGraph，这段代码是不需要的。
-之所有要这样做是因为，mxGraph 有些源码是通过 window.xxx 对以上的属性进行访问的，如果不做全局绑定使用起来会有点问题。
-这是官方还没修复的一个 BUG，详情可以查看上面注释的 issue。
+- 如果你是通过 script 标签引入 mxGraph，是不需要绑定全局变量那段代码的。模块化引入要使用这段代码是因为，mxGraph 这个框架有些代码是通过 window.mxXXX 对以上的属性进行访问的，如果不做全局绑定使用起来会有点问题。
+这是官方一个未修复的 BUG，详情可以查阅上面代码注释的 issue
 
-## 小Demo 讲解
-### 插入节点
+## 基础知识
+这部分会使用到[官网的例子](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)，及我自己编写的[一些例子](https://github.com/jinzhanye/learn-mxgraph)。大家可以先把代码下载下来，这些例子都是不需要使用 node 运行的，直接双击打开文件在浏览器运行即可。
+
+### Cell
+`Cell` 在 mxGraph 中可以代表`组(Group)`、`节点(Vertex)`、`边(Edge)`，[mxCell](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxCell-js.html#mxCell.mxCell) 这个类封装了 `Cell` 的操作，本教程不涉及到`组`的内容。下文若出现 `Cell` 字眼可以当作 `节点` 或 `边`。
 
 ### 事务
-这个 Hello World 的例子并不难。
+官方的 [HelloWorld](https://github.com/jgraph/mxgraph/blob/master/javascript/examples/helloworld.html) 的例子向我们展示了如何将节点插入到画布。比较引人注意的是 `beginUpdate` 与 `endUpdate` 这两个方法，这两个方法在官方例子中出镜频率非常高，
+我们来了解一下他们是干嘛用的，嗯，真是只是了解一下就可以了，因为官方对两个方法的描述对入门者来说真的是比较晦涩难懂，而且我在实际开发中基本用不上这两个方法。
+可以等掌握这个框架基本使用后再回过头来研究。下面的描述来源这个[文档](https://jgraph.github.io/mxgraph/docs/tutorial.html)，我来简单概括一下有关这两个方法的相关信息。
+
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0vjeq1nasj30pe0isn1k.jpg)
+
+- `beginUpdate、endUpdate` 用于创建一个事务，一次 `beginUpdate` 必须对应一次 `endUpdate`
+- 为了保证，假如 beginUpdate 执行失败，endUpdate 永远不会被调用，`beginUpdate 一定要放到 try 块之外`
+- 为了保证，假如 try 块内更新失败，endUpdate 也一定被调用，`beginUpdate一定要放到 finally 块`
+- 使用 beginUpdate 与 endUpdate 可提高更新视图性能，框架内部做撤消/重做管理也需要 beginUpdate、endUpdate
+
+你可以试着把这两个方法从代码中删掉，程序还是可以正常运行。
 
 ```js
 const parent = graph.getDefaultParent();
@@ -121,19 +127,6 @@ graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
 ```
 
 这段代码可以理解为将节点插入到画布，当然还可以将节点插入到另一个节点中，后面会讲述。
-
-还有就是 `beginUpdate` 与 `endUpdate` 这两个方法，这两个方法在官方例子中出镜频率非常高，
-我们来了解一下他们是干嘛用的，嗯，真是只是了解一下就可以了，因为官方对两个方法的描述对入门者来说真的是比较晦涩难懂，而且我在实际开发中基本用不上这两个方法。
-可以等掌握这个框架基本使用后再回过头来研究
-
-![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0vjeq1nasj30pe0isn1k.jpg)
-
-- beginUpdate、endUpdate 用于创建一个事务，一次 beginUpdate 必须对应一次 endUpdate
-- 为了保证，假如 beginUpdate 执行失败，endUpdate 不会被调用，`beginUpdate 一定要放到 try 块之外`
-- 为了保证，假如try块内更新失败，endUpdate 也一定会执行，`beginUpdate一定要放到 finally 块`
-- 使用 beginUpdate 与 endUpdate 可提高更新视图性能，框架内部做撤消/重做管理也需要 beginUpdate、endUpdate
-
-你可以试着把这两个方法从代码中删掉，程序还是可以正常运行。
 
 #### insertVertex 原理
 
@@ -158,6 +151,23 @@ mxGraph.prototype.insertVertex = function(parent, id, value,
 ```
 
 `insertEdge` 与 `insertVertex` 类似，中间过程会调用 `vertex.setEdge(true)` 将 `cell` 标记为线条
+
+
+
+### 面向对象编程
+mxGraph 框架的特点是使用面向对象的方式进行编程，所以在接下来的例子你会看到大量这种形式的方法重写(Overwrite)。
+
+```
+const oldBar =  mxFoo.prototype.bar;
+mxFoo.prototype.bar = function (...args)=> {
+   // .....
+	oldBar.apply(this,args);
+	// .....
+};
+```
+
+还有就是该框架所有类带 mx 前缀。
+
 
 ### style 的两种方式，小技巧
 
