@@ -48,7 +48,7 @@ mxBasePath = '../src';
 
 ![](https://ws4.sinaimg.cn/large/006tKfTcgy1g108oivvzmj305s03e3yg.jpg)
 
-`mxBasePath` 指向的路径作为 mxGraph 的静态资源路径。上图是 HelloWorld 项目的 `mxBasePah`，这些资源除了 js 目录 ，其他目录下的资源都是 mxGraph 运行过程中所需要的，所以要在引入 mxGraph 前先设置 `mxBasePaht`。 
+`mxBasePath` 指向的路径作为 mxGraph 的静态资源路径。上图是 HelloWorld 项目的 `mxBasePah`，这些资源除了 js 目录 ，其他目录下的资源都是 mxGraph 运行过程中所需要的，所以要在引入 mxGraph 前先设置 `mxBasePath`。 
 
 ![](https://ws1.sinaimg.cn/large/006tKfTcgy1g108qwr0ylj306i0dhaaj.jpg)
 
@@ -121,14 +121,7 @@ const {
 
 你可以试着把这两个方法从代码中删掉，程序还是可以正常运行。
 
-```js
-const parent = graph.getDefaultParent();
-graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
-```
-
-这段代码可以理解为将节点插入到画布，当然还可以将节点插入到另一个节点中，后面会讲述。
-
-#### insertVertex 原理
+### insertVertex
 
 ```
 mxGraph.prototype.insertVertex = function(parent, id, value,
@@ -150,9 +143,76 @@ mxGraph.prototype.insertVertex = function(parent, id, value,
 };
 ```
 
-`insertEdge` 与 `insertVertex` 类似，中间过程会调用 `vertex.setEdge(true)` 将 `cell` 标记为线条
+上面是经简化后的 `insertVertex ` 方法。 `insertVertex ` 做了三件事，先是设置几何信息，然后创建一个节点，最后将这个节点添加到画布。`insertEdge` 与 `insertVertex` 类似，中间过程会调用 `vertex.setEdge(true)` 将 `Cell` 标记为边。从这里我们也可以得知无论`节点`还是`边`在 mxGraph 中都是由 [mxCell](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxCell-js.html#mxCell.mxCell) 类表示，只是在该类内部标识这个 `Cell` 是 `节点` 还是 `边`。
 
 
+### mxGeometry
+
+```
+function mxGeometry(x,y,width,height){}
+```
+`mxGeometry` 类表示 `Cell` 的几何信息，宽高比较好理解，只对节点有意义，对边没意义。下面通过 [08.geometry.html](https://github.com/jinzhanye/learn-mxgraph/blob/master/demo/08.geometry.html) 这个例子说明如`x、y`的作用。
+
+![](https://ws2.sinaimg.cn/large/006tKfTcgy1g10aagk2tmj30g107n3yl.jpg)
+
+`mxGeometry ` 还有一个很重要的布尔属性 `relative`，
+
+- relative 为 false 的节点，表示以画布左上角为基点进行定位，`x、y` 使用的是绝对单位
+
+	上一小节提到 `insertVertex` 内部会创建 `mxGeometry` 类。使用 `mxGraph.insertVertex` 会创建一个 `mxGeometry.relative` 为 false 的节点，如 A 节点
+	
+	![](https://jgraph.github.io/mxgraph/docs/images/mx_man_non_relative_pos.png)	
+
+- relative 为 true 的节点，表示以父节点左上角为基点进行定位，`x、y` 使用的是相对单位
+
+	使用 `mxGraph.insertVertex` 会创建一个 relative 为 false 的节点。如果你要将一个节点添加到另一个节点中需要在该方法调用的第9个参数传入 true，将 relative 设置为 true。这时子节点使用相对坐标系，以父节点左上角作为基点，x、y 取值范围都是 \[-1,1]。如 C节点 相对 B节点定位。
+
+	![](https://jgraph.github.io/mxgraph/docs/images/mx_man_rel_vert_pos.png)
+
+- relative为 true 的边，`x、y` 用于定位 label
+
+	使用 `mxGraph.insertEdge` 会创建一条 relative 为 true 的边。x、y 用于定位线条上的 label，
+x 取值范围是 [-1,1]，-1 为起点，0 为中点，1 为终点。y 表示线条的正交线距离。第三个例子能帮忙大家理解这种情况。
+
+	![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0z65fc7a7j308v063dft.jpg)
+
+
+	```
+	const e1 = graph.insertEdge(parent, null, '30%', v1, v2);
+	e1.geometry.x = -0.5; // [-1,1] 调整 label 沿连接线的位置
+	e1.geometry.y = 100; // 调整label 在正交线上的距离
+	```
+
+### 设置样式
+![](https://jgraph.github.io/mxgraph/docs/images/mx_man_styles.png)
+
+查看 xx 例子，我们知道 mxGraph 提供两种设置样式的方式。
+
+第一种是设置全局样式。[mxStylesheet](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.mxStylesheet) 类用于管理图形样式，通过 [graph.getStylesheet()](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getStylesheet) 可以获取当前图形的 `mxStylesheet` 对象。`mxStylesheet` 对象的 `styles` 属性也是一个对象，该对象默认情况下包含两个对象`defaultVertexStyle、defaultEdgeStyle`，修改这两个对象里的样式属性对所有线条/节点都生效。
+
+第二种是对样式进行命名，然后使用 [mxStylesheet.putCellStyle](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.putCellStyle) 方法为 `mxStylesheet.styles` 添加样式对象。在添加 Cell 的时候，写在参数中。形式如下
+
+```
+[stylename;|key=value;]
+```
+
+例子中设置折线有一个需要注意的地方
+
+```
+// 设置拖拽线的过程出现折线，默认为直线
+    this.connectionHandler.createEdgeState = () => {
+      const edge = this.createEdge();
+      return new mxCellState(this.view, edge, this.getCellStyle(edge));
+    };
+```
+
+
+虽然调用 `insertEdge` 方法时已经设置了线条为折线，但是在拖拽线条过程中依然是直线。上面这段代码重写了 `createEdgeState` 方法，将拖动中的线条样式设置成与静态时的线条样式一致。
+
+mxGraph 所有样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html#mxConstants.STYLE_STROKECOLOR)可以查看，打开网站后可以看到以 `STYLE_` 开头的是样式常量。但是这些样式常量不能很好展示样式效果。下面教大家一个设置的小技巧，使用 [draw.io](https://www.draw.io/) 或 [GraphEditor](https://jgraph.github.io/mxgraph/javascript/examples/grapheditor/www/index.html) (这两个应该都是使用 mxGraph 进行开发的) 的 `Edit Style` 功能可以查看当前 Cell 样式。
+
+比如现在我想将边的样式设置成：折线、虚线、绿色、拐弯为圆角、粗3pt。在 Style 面板手动修改样式后，再点击 `Edit Style` 就可以看到对应的样式代码。
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0wstgt4a0j30ik0df3z7.jpg)
 
 ### 面向对象编程
 mxGraph 框架的特点是使用面向对象的方式进行编程，所以在接下来的例子你会看到大量这种形式的方法重写(Overwrite)。
@@ -167,86 +227,6 @@ mxFoo.prototype.bar = function (...args)=> {
 ```
 
 还有就是该框架所有类带 mx 前缀。
-
-
-### style 的两种方式，小技巧
-
-`mxStylesheet` 默认情况下有两个属性 defaultEdgeStyle 、defaultVertexStyle。
-修改这两个属性对所有线条/节点都生效。
-
-你还可以使用 `mxStylesheet.putCellStyle` 为 mxStylesheet 添加样式对象。然后在添加 Cell 的时候，写在参数中。 
-
-[](https://jgraph.github.io/mxgraph/docs/images/mx_man_styles.png)
-
-```
-[stylename;|key=value;]
-```
-
-rounded 是内置样式
-
-```js
-this.getStylesheet().putCellStyle('normalType', normalTypeStyle);
-```
-
-例子中设置折线有一个需要注意的地方
-
-```
-// 设置拖拽线的过程出现折线，默认为直线
-    this.connectionHandler.createEdgeState = () => {
-      const edge = this.createEdge();
-      return new mxCellState(this.view, edge, this.getCellStyle(edge));
-    };
-```
-
-虽然调用 `insertEdge` 方法时已经设置了线条为折线，但是在拖拽线条过程中依然是直线。
-上面这段代码重写了 `createEdgeState` 方法，将拖动中的线条样式设置成与静态时的线条样式一致。
-
-#### 小技巧
-mxGraph 所有可设置样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html#mxConstants.STYLE_STROKECOLOR)可以查看，打开网站后可以看到以 `STYLE` 开头
-的常量就是可设置的样式。但是官方这个网站全是文字描述，根本表现不出这些样式的效果。下面教大家一个设置的小技巧，使用 [draw.io](https://www.draw.io/) 的 `Edit Style` 功能可以查看当前 Cell 样式。
-
-比如现在我想将线条的样式改成：折线、虚线、绿色、拐弯为圆角、粗3pt。在 Style 面板手动修改样式后，再点击 `Edit Style` 就可以看到对应的样式代码。
-![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0wstgt4a0j30ik0df3z7.jpg)
-
-
-### 定位
-
-```
-function mxGeometry(x,y,width,height)
-```
-
-`mxGeometry` 这个类用于设置 `Cell` 的位置及宽高信息，下面通过这个 例子 todo 加链接，说明如何给 `Cell` 定位
-
-todo 加图片
-
-- relative 为 false 节点
-
-使用 `mxGraph.insertVertex` 会创建一个 `mxGeometry.relative` 为 false 的节点，这里节点以左上角为基点相对于画布定位，如 A 节点那个例子。
-
-- relative 为 true 的节点
-
-使用 `mxGraph.insertVertex` 会创建一个 relative 为 false 的节点。如果你要将一个节点添加到另一个节点中需要在该方法调用的第9个参数传入 true，将 relative 设置为 true。
-这里子节点使用相对坐标系，以父节点左上角作为基点，x、y 取值范围都是 \[-1,1]
-
-![](https://jgraph.github.io/mxgraph/docs/images/mx_man_rel_vert_pos.png)
-
-- relative为 true 的线条
-
-![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0z65fc7a7j308v063dft.jpg)
-
-使用 `mxGraph.insertEdge` 会创建一条 relative 为 true 的线条。x、y 用于定位线条上的 label，
-x 取值范围是 [-1,1]，-1 为起点，0 为中点，1 为终点。y 表示线条的正交线距离。
-
-
-```
-const e1 = graph.insertEdge(parent, null, '30%', v1, v2);
-// relative position，以线条中点为中心
-e1.geometry.offset = new mxPoint(50, 20); // label 位置向右偏移50px，向下偏移30px，默认 null
-e1.geometry.x = -0.5; // [-1,1] 调整 label 沿连接线的位置
-e1.geometry.y = 30; // 调整label 在正交线上的距离
-```
-
-mxGoemery
 
 ### 节点组合
 
