@@ -471,30 +471,30 @@ vertex: true
 
 ### 事件
 
-本项目用到事件监听写在 AppCanvas.vue 的 _listenEvent 方法，
+本项目监听事件写在 [AppCanvas.vue](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/pages/AppCanvas.vue) 的 _listenEvent 方法，可以在这个方法了解一些常用的事件。下图来自 [mxGraph ](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph) 类的方法调用依赖图，我们也可以从这里看出整个框架的事件流动
 
 ![](https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png)
 
-![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0xo1ow1p0j30id010gls.jpg)
-
 #### 监听事件
 
-`mxGraph` 类继承自 `mxEventSource` 类，使用父亲 `addListener` 方法可以将自身当作一个事件中心订阅/广播事件。
+本项目的 _listenEvent 方法用到两个事件监听对象。
 
-`graph.getSelectionModel()` 返回一个 `mxGraphSelectionModel` 对象，这个对象有 `mxEvent.UNDO、mxEvent.CHANGE` 两个事件，
-通过监听 `mxEvent.CHANGE` 事件可以获取当前被选中的 `Cell`
+[mxGraph](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html) 继承自 [mxEventSource](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxEventSource-js.html#mxEventSource.mxEventSource)，使用父类的 [addListener](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxEventSource-js.html#mxEventSource.addListener) 方法可以将自身当作一个事件中心进行订阅/广播事件。
 
-#### 区别
+[mxGraph.getSelectionModel()](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getSelectionModel) 返回一个 [mxGraphSelectionModel](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraphSelectionModel-js.html#mxGraphSelectionModel.mxGraphSelectionModel) 对象，这个对象也是继承自 `mxEventSource` 有 `mxEvent.UNDO、mxEvent.CHANGE` 两个事件，通过监听 `mxEvent.CHANGE` 事件可以获取当前被选中的 `Cell`。
 
-- 添加cell的时候会触发两个事件 `ADD_CELLS`、`CELLS_ADDED`， 先触发 `CELLS_ADDED` 后触发 `ADD_CELLS`。
-- `ADD_CELLS`、`CELLS_ADDED` 的区别，`ADD_CELLS` 在 `addCells` 方法中触发，而 `CELLS_ADDED` 在 `cellsAdded` 方法中触发。
-而对于 `addCells` 与 `cellsAdded` 官方文档也只是两个句的说明，体现不出多大区别，对于这两个方法的本质区别我还存有疑惑。
-但按经验而言后触发的事件会携带更多的信息，所以平时开发我会监听`ADD_CELLS` 事件。`MOVE_CELLS、CELLS_MOVED`、`REMOVE_CELLS、CELLS_REMOVED` 等事件与此类似。
+#### ADD\_CELLS 与 CELLS\_ADD 的区别
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0xo1ow1p0j30id010gls.jpg)
 
-- 判断一个节点/线被添加
+`mxGraph` 类有很多 `XXX_CELLS`、`CELLS_XXXED` 这种形式的事件，这部分我还没弄懂，下面仅以添加事件为例探讨这两类事件的区别。
 
-从图中我们可以看到，`insertVertex`、`insertEdge` 最终都被当作 `Cell` 处理，在后续触发的事件也没有对节点/线条进行区分，而是统一当作 `Cell` 事件。
-所以对于一个 `Cell` 添加事件，需要自己区别是添加了节点还是添加了条线。
+- 添加 `Cell` 的时候会触发两个事件 `ADD_CELLS`、`CELLS_ADDED`， 先触发 `CELLS_ADDED` 后触发 `ADD_CELLS`。
+- `ADD_CELLS` 在 `addCells` 方法中触发，而 `CELLS_ADDED` 在 `cellsAdded` 方法中触发。而对于 `addCells` 与 `cellsAdded` 官方文档也只是两个句的说明，体现不出多大区别。按经验而言后触发的事件会携带更多的信息，所以平时开发我会监听`ADD_CELLS` 事件。`MOVE_CELLS、CELLS_MOVED`、`REMOVE_CELLS、CELLS_REMOVED` 等事件与此类似。
+
+#### 监听 Cell 添加事件
+
+从上面的方法调用依赖图中我们可以看到，`insertVertex`、`insertEdge` 最终都被当作 `Cell` 处理，在后续触发的事件也没有对 `节点/边` 进行区分，而是统一当作 `Cell` 事件。
+所以对于一个 `Cell` 添加事件，需要自己区别是添加了节点还是添加了边。
 
 ```
       graph.addListener(mxEvent.CELLS_ADDED, (sender, evt) => {
@@ -511,23 +511,21 @@ vertex: true
       });
 ```
 
-还有就是对于子节点添加到父节点的情况(如上面提到的将 `titleVertex` 、`normalTypeVertex` 添加到 `nodeRootVertex`)也是会触发 `Cell` 添加事件的。
-通常对于这些子节点不作处理，可以像 `consti.html` 那个例子一样用一个 `isPart` 判断过滤掉。
+还有就是对于子节点添加到父节点的情况(如本项目将 `titleVertex` 、`normalTypeVertex` 添加到`nodeRootVertex`)也是会触发 `Cell` 添加事件的。通常对于这些子节点不作处理，可以像 `consti.html` todo 外链 那个例子一样用一个 `isPart` 判断过滤掉。
 
 #### 自定义事件
 
-mxGraph 提供自定义事件功能，使用 fireEvent 与 mxEventObject TODO 加文档外链。下面代码是一个最简单的例子
+上面提到过 mxGraph 继承自 mxEventSource，调用父类的 [fireEvent](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxEventSource-js.html#mxEventSource.mxEventSource) 可触发自定义事件。下面是一个简单的例子
 
 ```
-graph.addListener('自定义事件A',()=>{
+mxGraph.addListener('自定义事件A',()=>{ 
   // do something .....
 });
 // 触发自定义事件
-graph.fireEvent(new mxEventObject('自定义事件A');
+mxGraph.fireEvent(new mxEventObject('自定义事件A');
 ```
 
-在本项目Graph类 (`src/graph/Graph.js` ) 的 `_configCustomEvent` 方法我也实现了两个自定义了事件。
-当线条开始拖动时会触发 `EDGE_START_MOVE` 事件，当节点开始拖动时会触发 `VERTEX_START_MOVE` 事件。
+在本项目 [Graph](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/Graph.js) 类的 _configCustomEvent 方法我也实现了两个自定义了事件。当边开始拖动时会触发 `EDGE_START_MOVE` 事件，当节点开始拖动时会触发 `VERTEX_START_MOVE` 事件。
 
 ### 导出图片
 mxGraph 导出图片的思路是先在前端导出图形的 xml 及计算图形的宽高，然后将 xml、宽、高，这有三项数据发送给服务端，服务端也使用 mxGraph 提供的 API 将 xml 转换成图片。服务端如果是使用 Java 可以参考官方这个[例子](https://github.com/jgraph/mxgraph/blob/master/java/test/com/mxgraph/test/mxImageExportTest.java)，下面主要介绍前端需要做的工作。
@@ -580,7 +578,8 @@ xmlCanvas.translate(
 
 还有就是如果导出的图片里的节点的某些颜色跟设置的有差异，那可能是设置样式时写了3位数的颜色像 `#fff`，颜色一定要使用完整的6位，否则导出图片会有问题。
 
-## 总结 
-- 使用的所有 demo
-- 知识点
-- 注意问题 style颜色要有6位、- 左上边界搞不定
+## 参考
+- [mxGraph Tutorial](https://jgraph.github.io/mxgraph/docs/tutorial.html)
+- [mxGraph User Manual – JavaScript Client](https://jgraph.github.io/mxgraph/docs/manual.html)
+- [mxGraph API Specification](https://jgraph.github.io/mxgraph/docs/js-api/files/index-txt.html)
+- [mxGraph Javascript Examples](https://jgraph.github.io/mxgraph/javascript/index.html)
