@@ -394,14 +394,16 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmcy67uaj30mj0fedj4.jpg)
 
+
+
 ### Model
-现在介绍一个概念 Model，Model 代表的是当前图形的数据结构化表示。mxGraphModel 封装了 Model 的相关操作。
+现在介绍一下 Model 这个概念，Model 是当前图形的数据结构化表示。[mxGraphModel](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxGraphModel-js.html) 封装了 Model 的相关操作。
 
 你可以启动项目，画一个这样的图
 
 ![](https://ws3.sinaimg.cn/large/006tKfTcgy1g0xy1zmmqrj30f10gb0tn.jpg)
 
-导出之后应该等到这样一份 xml
+导出之后应该得到这样一份 xml
 
 ```
 <mxGraphModel>
@@ -419,7 +421,7 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 </mxGraphModel>
 ```
 
-这份 xml 就是当前图形的 model 的结构化表示，也就是当前 model。为了方便观察，我手动格式化“男1号”这个节点 
+我们对第一个节点手动格式化
 
 ```xml
 <mxCell 
@@ -446,7 +448,7 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 </mxCell>
 ```
 
-这样一看，这份数据与下面的对象本质上是不是同一个东西
+再来对比这个节点的对象，可以发现它们只是同一个 Model 的不同表现形式，xml 正是将 [mxGraph.model](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.model) 格式化而成的。
 
 ```
 id: "3"
@@ -528,14 +530,12 @@ graph.fireEvent(new mxEventObject('自定义事件A');
 当线条开始拖动时会触发 `EDGE_START_MOVE` 事件，当节点开始拖动时会触发 `VERTEX_START_MOVE` 事件。
 
 ### 导出图片
-导出图片可以使用 `mxImageExport` 这个类实现，[官方文档](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxImageExport-js.html#mxImageExport.mxImageExport)
-也有一段可以使用拿出使用的代码。
+mxGraph 导出图片的思路是先在前端导出图形的 xml 及计算图形的宽高，然后将 xml、宽、高，这有三项数据发送给服务端，服务端也使用 mxGraph 提供的 API 将 xml 转换成图片。服务端如果是使用 Java 可以参考官方这个[例子](https://github.com/jgraph/mxgraph/blob/master/java/test/com/mxgraph/test/mxImageExportTest.java)，下面主要介绍前端需要做的工作。
+
+导出图片可以使用 [mxImageExport](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxImageExport-js.html#mxImageExport.mxImageExport) 类，该类的文档有一段可以直接拿来使用的代码。
 
 ```
-var xmlDoc = mxUtils.createXmlDocument();
-var root = xmlDoc.createElement('output');
-xmlDoc.appendChild(root);
-
+// ...
 var xmlCanvas = new mxXmlCanvas2D(root);
 var imgExport = new mxImageExport();
 imgExport.drawState(graph.getView().getState(graph.model.root), xmlCanvas);
@@ -545,13 +545,11 @@ var w = Math.ceil(bounds.x + bounds.width);
 var h = Math.ceil(bounds.y + bounds.height);
 
 var xml = mxUtils.getXml(root);
-new mxXmlRequest('export', 'format=png&w=' + w +
-     '&h=' + h + '&bg=#F9F7ED&xml=' + encodeURIComponent(xml))
-     .simulate(document, '_blank');
+// ...
 ```
 
 但这段代码会将整块画布截图，而不是以最左上角的元素及最右下角的元素作为边界截图。如果你有以元素作为边界的需求，
-则需要调用 `xmlCanvas.translate` 调整裁图边界。
+则需要调用 [xmlCanvas.translate](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxXmlCanvas2D-js.html#mxXmlCanvas2D.translate) 调整裁图边界。
 
 ```
 //.....
@@ -563,11 +561,24 @@ xmlCanvas.translate(
 //.....
 ```
 
-加上上面的代码后就可以达到以最左上角的元素及最右下角的元素作为边界的截图效果。可以参考 Graph 类的 exportPicXML 方法
+完整截图代码可以参考本项目 [Graph](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/Graph.js) 类的 exportPicXML 方法。
 
-todo 补充java截图代码
+如果节点像我的项目一样使用到图片，而导出来的图片的节点没有图片。可以从两个方向排查问题，先检查发送的 xml 里的图片路径是否是可访问的，如下面 xxx
 
-如果图片生成失败，请使用 png 或 jpg 格式。
+```xml
+<mxCell 
+  id="4"
+  value="男1号" 
+  style="node;image=/static/images/ele/ele-005.png"
+  vertex="1" 
+  parent="1">
+  // ......
+</mxCell>
+```
+
+如果图片路径没问题再检查一下使用的图片格式，本来我在公司项目中节点内使用的图片是 svg 格式，导出图片失败，可能是 mxGraph 不支持这个格式，后来换成 png 之后问题就解决了。
+
+还有就是如果导出的图片里的节点的某些颜色跟设置的有差异，那可能是设置样式时写了3位数的颜色像 `#fff`，颜色一定要使用完整的6位，否则导出图片会有问题。
 
 ## 总结 
 - 使用的所有 demo
