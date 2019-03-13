@@ -214,8 +214,35 @@ mxGraph 所有样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/fil
 比如现在我想将边的样式设置成：折线、虚线、绿色、拐弯为圆角、粗3pt。在 Style 面板手动修改样式后，再点击 `Edit Style` 就可以看到对应的样式代码。
 ![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0wstgt4a0j30ik0df3z7.jpg)
 
+注意以 `entry` 或 `exit` 开头的样式代表的是靶点的坐标，下一小节会进行讲解。
+
+### Anchor
+关于如何设置靶点可以参考 xxan.html ，下面也是以这个 Demo 进行讲解两个用户操作的例子，对比不同的操作对于获取靶点信息的影响。
+
+将鼠标悬浮中 A 节点中心，待节点高亮时连接到 B 节点的一个靶点上
+
+![](https://ws3.sinaimg.cn/large/006tKfTcgy1g11f55anqyj308g06vmx0.jpg)
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g11f66hy3ij30qg07gt8w.jpg)
+
+然后将 A 节点拖拽到 B 节点右边
+
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g11f728kyij30ch04gwec.jpg)
+
+可以看到如果从图形中心拖出线条，这时边的出口值 `exit` 为空，只有入口值 `entry`。如果拖动节点 mxGraph 会智能地调整线条出口方向。如节点 A 的连接靶点原来是在右边，节点拖动到节点 B 右边后靶点也跟着发生了变化，而节点 B 的连接靶点一直没变。
+
+这次将鼠标悬浮到 A 节点的一个靶点，待靶点高亮时连接到 B 节点的一个靶点上
+
+![](https://ws3.sinaimg.cn/large/006tKfTcgy1g11f7lugscj308p0750sl.jpg)
+![](https://ws3.sinaimg.cn/large/006tKfTcgy1g11f825hl6j30ql07v0t0.jpg)
+
+然后将 A 节点拖拽到 B 节点右边
+
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g11f8gve0qj30b904ajr8.jpg)
+
+可以看到这次所有值都有了，连接后拖动节点 A，连接靶点的位置也固定不变，mxGraph 不像第一个例子一样调整连接靶点位置。
+
 ### 面向对象编程
-mxGraph 框架的特点是使用面向对象的方式进行编程，所以在接下来的例子你会看到大量这种形式的方法重写(Overwrite)。
+mxGraph 框架是使用面向对象的方式进行编写的，该框架所有类带 mx 前缀。在接下来的例子你会看到很多这种形式的方法`重写(Overwrite)`。
 
 ```
 const oldBar =  mxFoo.prototype.bar;
@@ -226,19 +253,17 @@ mxFoo.prototype.bar = function (...args)=> {
 };
 ```
 
-还有就是该框架所有类带 mx 前缀。
-
 ### 节点组合
 
-我说一下 constituent 这个例子，值得注意的几个地方
+这一小节通过 constituent 这个例子，讲解节点组合需要注意的地方
 
-组合节点后默认情况下，父节点是可折叠的，要关闭折叠设置 `foldingEnabled` 为 `false` 即可
+组合节点后默认情况下，父节点是可折叠的，要关闭折叠功能需要将 `foldingEnabled` 设为 `false`
 
 ```js
 graph.foldingEnabled = false;
 ```
 
-如果希望在改变节点尺寸时，子节点与父节点等比例缩放，需要开启 `recursiveResize`
+如果希望在改变父节点尺寸时，子节点与父节点等比例缩放，需要开启 `recursiveResize`
 
 ```js
 graph.recursiveResize = true;
@@ -275,55 +300,47 @@ graph.selectCellForEvent = function(cell)
 };
 ```
 
-这两个方法重写(Overwrite)了原方法，思路都是判断如果该节点是子节点则替换成父节点去处理剩下的逻辑。
+这两个方法`重写(Overwrite)`了原方法，思路都是判断如果该节点是子节点则替换成父节点去执行剩下的逻辑。
 
-第一个方法 `getInitialCellForEvent` 在鼠标按下(mousedown事件，不是click事件)时触发，
+`getInitialCellForEvent` 在鼠标按下(mousedown事件，不是click事件)时触发，
 如果注释掉这段代码，不使用父节点替换，当发生拖拽时子节点会被单独拖拽，不会与父节点联动。
-使用父节点替换后，原本子节点应该被拖拽，现在变成了父节点被拖拽，会发生联动效果。
+使用父节点替换后，原本子节点应该被拖拽，现在变成了父节点被拖拽，实现联动效果。
 
-通过 debugger 进去 `getInitialCellForEvent` 可以得知，第二个方法 `selectCellForEvent` 其实是 `getInitialCellForEvent` 内部调用的一个方法。
-这个方法的作用是将 cell 设置为 `selectCell`，设置后通过 `graph.getSelectoinCell` 可获取得该节点，与 `getInitialCellForEvent` 同理，如果不使用父节点替换，
-则 `graph.getSelectoinCell` 获取到的会是子节点。
-
-### anchor
-
-注意以 `entry` 或 `exit` 开头的样式代表的是靶点，请参考 anchor 例子。
-
-// TODO 修改官方 anchor.html demo 加图片说明
-A->B
-C->D
-E->F
-
-可以看到如果不设置靶点，当节点被拖拽后 mxGraph 会智能地更换线条的出入的方向，而设置靶点样式后线条出入口就固定了。
-
-默认情况下，可以从图形中心拖出线条，这时线条的 `exit` 为空，mxGraph 会智能地调整线条出口方向。而从图形的靶点拖出线条，则 `exit` 为固定值，连接线条后，拖拽图形，mxGraph 不会调整线条出口方向。
-入口情况同理。
+`selectCellForEvent` 其实是 `getInitialCellForEvent` 内部调用的一个方法。这个方法的作用是将 cell 设置为 `selectCell`，设置后通过 `mxGraph.getSelectoinCell()` 可获取得该节点，与 `getInitialCellForEvent` 同理，如果不使用父节点替换，则 `mxGraph.getSelectoinCell` 获取到的会是子节点。
 
 ## 项目实战
-todo 外元素拖拽直接在代码中链接到自己写的简化版 example
+这部分我主要挑一些这个项目比较重要的点进行讲解。
 
-### 做一个节点组合
-下面我以项目这个节点为例，讲解一下如何组合节点
+### 写一个节点组合
+下面以项目的这个节点为例，讲解一下如何组合节点
+
+todo 加图片
+
 
 ```js
-    const nodeRootVertex = new mxCell('鼠标双击输入', new mxGeometry(0, 0, 100, 135), `node;image=${src}`);
-    nodeRootVertex.vertex = true;
-    
-    const title = source.getAttribute('alt');
-    const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
-      0.1, 0.65, 80, 16,
-      'constituent=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontColor=#e6a23c',
-      true);
-    titleVertex.setConnectable(false);
+const insertVertex = (dom) => {
+  // ...
+  const nodeRootVertex = new mxCell('鼠标双击输入', new mxGeometry(0, 0, 100, 135), `node;image=${src}`);
+  nodeRootVertex.vertex = true;
+  // ...
+  
+  const title = dom.getAttribute('alt');
+  const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
+    0.1, 0.65, 80, 16,
+    'constituent=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontColor=#e6a23c',
+    true);
+  titleVertex.setConnectable(false);
 
-    const normalTypeVertex = graph.insertVertex(nodeRootVertex, null, null,
-      0.05, 0.05, 19, 14,
-      `normalType;constituent=1;fillColor=none;image=/static/images/normal-type/forest.png`,
-      true);
-    normalTypeVertex.setConnectable(false);
+  const normalTypeVertex = graph.insertVertex(nodeRootVertex, null, null,
+    0.05, 0.05, 19, 14,
+    `normalType;constituent=1;fillColor=none;image=/static/images/normal-type/forest.png`,
+    true);
+  normalTypeVertex.setConnectable(false);
+  // .....
+};
 ```
 
-单单 `nodeRootVertex` 就是长这个样子。通过设置自定义的 `node` 样式与 `image` 属性设置图片路径配合完成。
+单单 `nodeRootVertex` 就是长这个样子。通过设置自定义的 `node` 样式( 见 Graph 类 xxx方法  )与 `image` 属性设置图片路径配合完成。
 
 ![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0xqbyl8ovj304t04tglm.jpg)
 
@@ -355,13 +372,13 @@ mxCellEditor.prototype.escapeCancelsEditing = false;
 mxCellEditor.prototype.blurEnabled = true;
 ```
 
-默认情况下输入内容时如果按回车键内容会换行，但有些业务场景禁止换行，回车表示完成输入，通过这行代码 `graph.setEnterStopsCellEditing(true)` 设置可以满足需求。
+默认情况下输入内容时如果按回车键内容会换行，但有些业务场景禁止换行，回车表示完成输入，通过[graph.setEnterStopsCellEditing(true)](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.setEnterStopsCellEditing) 设置可以满足需求。
 
-重点说说这句 `mxCellEditor.prototype.blurEnabled`。默认情况下如果用户在输入内容时鼠标点击了画布之外的不可聚焦区域(div、section、article等)，节点内的编辑器是不会失焦的，
-这导致了 `LABEL_CHANGED` 事件不会被触发。但在实际项目开发中一般我们会期望，如果用户在输入内容时鼠标点击了画布之外的地方就应该算作完成一次输入，然后通过被触发的 `LABEL_CHANGED` 事件将修改后的内容同步到服务端。
+重点说说这个属性 [mxCellEditor.prototype.blurEnabled](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxCellEditor-js.html#mxCellEditor.blurEnabled)，默认情况下如果用户在输入内容时鼠标点击了画布之外的不可聚焦区域(div、section、article等)，节点内的编辑器是不会失焦的，
+这导致了 [LABEL_CHANGED](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.mxEvent.LABEL_CHANGED) 事件不会被触发。但在实际项目开发中一般我们会期望，如果用户在输入内容时鼠标点击了画布之外的地方就应该算作完成一次输入，然后通过被触发的 `LABEL_CHANGED` 事件将修改后的内容同步到服务端。
 通过 `mxCellEditor.prototype.blurEnabled = true` 这行代码设置可以满足我们的需求。
 
-#### 可换行显示的 label
+#### 可换行的 label
 ````
 const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
       0.1, 0.65, 80, 16,
@@ -369,13 +386,11 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
       true);
 ````
 
-对于非输入的文本内容，默认情况下即便文本超出容器宽度也是不会换行的。我们项目中宽度为80的 titleVertex 正是这样一个例子。
+对于非输入的文本内容，默认情况下即便文本超出容器宽度也是不会换行的。我们项目中宽度为 80 的 titleVertex 正是这样一个例子。
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmmixmizj30lg095abj.jpg)
 
-要设置换行需要做两件事，
-第一是通过这行代码 `graph.setHtmlLabels(true)`，使用 html 渲染文本(mxGraph 默认使用 svg的text 标签渲染文本)
-第二是像上面的 titleVertex 的样式设置一样，添加一句 `whiteSpace=wrap`
+要设置换行需要做两件事，第一是通过这行代码 [mxGraph.setHtmlLabels(true)](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.setHtmlLabels)，使用 html 渲染文本(mxGraph 默认使用 svg的text 标签渲染文本)。第二是像上面的 titleVertex 的样式设置一样，添加一句 [whiteSpace=wrap](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html#mxConstants.STYLE_WHITE_SPACE)
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmcy67uaj30mj0fedj4.jpg)
 
