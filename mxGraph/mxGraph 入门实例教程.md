@@ -190,31 +190,39 @@ x 取值范围是 [-1,1]，-1 为起点，0 为中点，1 为终点。y 表示�
 
 第一种是设置全局样式。[mxStylesheet](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.mxStylesheet) 类用于管理图形样式，通过 [graph.getStylesheet()](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getStylesheet) 可以获取当前图形的 `mxStylesheet` 对象。`mxStylesheet` 对象的 `styles` 属性也是一个对象，该对象默认情况下包含两个对象`defaultVertexStyle、defaultEdgeStyle`，修改这两个对象里的样式属性对所有线条/节点都生效。
 
-第二种是对样式进行命名，然后使用 [mxStylesheet.putCellStyle](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.putCellStyle) 方法为 `mxStylesheet.styles` 添加样式对象。在添加 Cell 的时候，写在参数中。形式如下
+第二种是对样式进行命名，然后使用 [mxStylesheet.putCellStyle](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.putCellStyle) 方法为 `mxStylesheet.styles` 添加样式对象。在添加 Cell 的时候，将样式写在参数中。格式如下
 
 ```
 [stylename;|key=value;]
 ```
 
+分号前可以跟自定义样式名称或者一个样式 key、value 对。
+
+`ROUNDED` 是一个内置的命名样式，对节点设置有圆角效果，对边设置则边的拐弯处是圆角。
+
 例子中设置折线有一个需要注意的地方
 
 ```
 // 设置拖拽线的过程出现折线，默认为直线
-    this.connectionHandler.createEdgeState = () => {
-      const edge = this.createEdge();
-      return new mxCellState(this.view, edge, this.getCellStyle(edge));
-    };
+this.connectionHandler.createEdgeState = () => {
+  const edge = this.createEdge();
+  return new mxCellState(this.view, edge, this.getCellStyle(edge));
+};
 ```
 
 
-虽然调用 `insertEdge` 方法时已经设置了线条为折线，但是在拖拽线条过程中依然是直线。上面这段代码重写了 `createEdgeState` 方法，将拖动中的线条样式设置成与静态时的线条样式一致。
+虽然调用 `insertEdge` 方法时已经设置了线条为折线，但是在拖拽边过程中依然是直线。上面这段代码重写了 `createEdgeState` 方法，将拖动中的边样式设置成与静态时的边样式一致，都是折线。
 
-mxGraph 所有样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html#mxConstants.STYLE_STROKECOLOR)可以查看，打开网站后可以看到以 `STYLE_` 开头的是样式常量。但是这些样式常量不能很好展示样式效果。下面教大家一个设置的小技巧，使用 [draw.io](https://www.draw.io/) 或 [GraphEditor](https://jgraph.github.io/mxgraph/javascript/examples/grapheditor/www/index.html) (这两个应该都是使用 mxGraph 进行开发的) 的 `Edit Style` 功能可以查看当前 Cell 样式。
+#### 查看样式效果小技巧
+
+mxGraph 所有样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html#mxConstants.STYLE_STROKECOLOR)可以查看，打开网站后可以看到以 `STYLE_` 开头的是样式常量。但是这些样式常量并不能展示样式的效果。下面教大家一个查看样式效果的小技巧，使用 [draw.io](https://www.draw.io/) 或 [GraphEditor](https://jgraph.github.io/mxgraph/javascript/examples/grapheditor/www/index.html) (这两个应该都是使用 mxGraph 进行开发的) 的 `Edit Style` 功能可以查看当前 Cell 样式。
 
 比如现在我想将边的样式设置成：折线、虚线、绿色、拐弯为圆角、粗3pt。在 Style 面板手动修改样式后，再点击 `Edit Style` 就可以看到对应的样式代码。
-![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0wstgt4a0j30ik0df3z7.jpg)
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g122puprr5j30en0cp0tp.jpg)
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g122s3z4ioj30c708u0t7.jpg)
 
-注意以 `entry` 或 `exit` 开头的样式代表的是靶点的坐标，下一小节会进行讲解。
+为了方便观察我手动格式化了样式，注意最后一行以 `entry` 或 `exit` 开头的样式代表的是边出口/入口的靶点坐标，下一小节会进行讲解。
+
 
 ### Anchor
 关于如何设置靶点可以参考 xxan.html ，下面也是以这个 Demo 进行讲解两个用户操作的例子，对比不同的操作对于获取靶点信息的影响。
@@ -302,11 +310,10 @@ graph.selectCellForEvent = function(cell)
 
 这两个方法`重写(Overwrite)`了原方法，思路都是判断如果该节点是子节点则替换成父节点去执行剩下的逻辑。
 
-`getInitialCellForEvent` 在鼠标按下(mousedown事件，不是click事件)时触发，
-如果注释掉这段代码，不使用父节点替换，当发生拖拽时子节点会被单独拖拽，不会与父节点联动。
+[getInitialCellForEvent](https://jgraph.github.io/mxgraph/docs/js-api/files/handler/mxGraphHandler-js.html#mxGraphHandler.getInitialCellForEvent) 在鼠标按下(mousedown事件，不是click事件)时触发，如果注释掉这段代码，不使用父节点替换，当发生拖拽时子节点会被单独拖拽，不会与父节点联动。
 使用父节点替换后，原本子节点应该被拖拽，现在变成了父节点被拖拽，实现联动效果。
 
-`selectCellForEvent` 其实是 `getInitialCellForEvent` 内部调用的一个方法。这个方法的作用是将 cell 设置为 `selectCell`，设置后通过 `mxGraph.getSelectoinCell()` 可获取得该节点，与 `getInitialCellForEvent` 同理，如果不使用父节点替换，则 `mxGraph.getSelectoinCell` 获取到的会是子节点。
+[selectCellForEvent](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.selectCellForEvent) 其实是 `getInitialCellForEvent` 内部调用的一个方法。这个方法的作用是将 cell 设置为 `selectionCell`，设置后可通过 [mxGraph.getSelectionCell](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getSelectionCell) 可获取得该节点。与 `getInitialCellForEvent` 同理，如果不使用父节点替换，则 `mxGraph.getSelectionCell ` 获取到的会是子节点。项目实战我们会使用到 `mxGraph.getSelectionCell ` 这个接口。
 
 ## 项目实战
 这部分我主要挑一些这个项目比较重要的点进行讲解。
@@ -561,20 +568,13 @@ xmlCanvas.translate(
 
 完整截图代码可以参考本项目 [Graph](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/Graph.js) 类的 exportPicXML 方法。
 
-如果节点像我的项目一样使用到图片，而导出来的图片的节点没有图片。可以从两个方向排查问题，先检查发送的 xml 里的图片路径是否是可访问的，如下面 xxx
+如果节点像我的项目一样使用到图片，而导出来的图片的节点没有图片。可以从两个方向排查问题，先检查发送的 xml 里的图片路径是否是可访问的，如下面是项目“导出图片”功能打印的 xml 里的一个图片标签。
 
 ```xml
-<mxCell 
-  id="4"
-  value="男1号" 
-  style="node;image=/static/images/ele/ele-005.png"
-  vertex="1" 
-  parent="1">
-  // ......
-</mxCell>
+<image x="484" y="123" w="72" h="72" src="http://localhost:7777/static/images/ele/ele-005.png" aspect="0" flipH="0" flipV="0"/>
 ```
 
-如果图片路径没问题再检查一下使用的图片格式，本来我在公司项目中节点内使用的图片是 svg 格式，导出图片失败，可能是 mxGraph 不支持这个格式，后来换成 png 之后问题就解决了。
+要保证 `http://localhost:7777/static/images/ele/ele-005.png` 是可访问的。如果图片路径没问题再检查一下使用的图片格式，本来我在公司项目中节点内使用的图片是 svg 格式，导出图片失败，可能是 mxGraph 不支持这个格式，后来换成 png 之后问题就解决了。
 
 还有就是如果导出的图片里的节点的某些颜色跟设置的有差异，那可能是设置样式时写了3位数的颜色像 `#fff`，颜色一定要使用完整的6位，否则导出图片会有问题。
 
