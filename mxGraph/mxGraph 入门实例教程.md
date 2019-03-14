@@ -123,7 +123,7 @@ const {
 
 ### insertVertex
 
-```
+```js
 mxGraph.prototype.insertVertex = function(parent, id, value,
                                           x, y, width, height, style, relative) {
 
@@ -148,7 +148,7 @@ mxGraph.prototype.insertVertex = function(parent, id, value,
 
 ### mxGeometry
 
-```
+```js
 function mxGeometry(x,y,width,height){}
 ```
 `mxGeometry` 类表示 `Cell` 的几何信息，宽高比较好理解，只对节点有意义，对边没意义。下面通过 [02.geometry.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/02.geometry.html) 这个例子说明如`x、y`的作用。
@@ -177,7 +177,7 @@ x 取值范围是 [-1,1]，-1 为起点，0 为中点，1 为终点。y 表示�
 	![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0z65fc7a7j308v063dft.jpg)
 
 
-	```
+	```js
 	const e1 = graph.insertEdge(parent, null, '30%', v1, v2);
 	e1.geometry.x = -0.5; // [-1,1] 调整 label 沿连接线的位置
 	e1.geometry.y = 100; // 调整label 在正交线上的距离
@@ -252,7 +252,7 @@ mxGraph 所有样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/fil
 ### 面向对象编程
 mxGraph 框架是使用面向对象的方式进行编写的，该框架所有类带 mx 前缀。在接下来的例子你会看到很多这种形式的方法`重写(Overwrite)`。
 
-```
+```js
 const oldBar =  mxFoo.prototype.bar;
 mxFoo.prototype.bar = function (...args)=> {
    // .....
@@ -354,7 +354,7 @@ const insertVertex = (dom) => {
 
 有时需要为不同子节点设置不同的鼠标悬浮图标，如本项目鼠标悬浮到 `normalTypeVertex ` 时鼠标变为手形，参考 AppCanvas.vue 的 setCursor 方法，重写 `mxGraph.prototype.getCursorForCell` 可以实现这个功能。
 
-```
+```js
 const setCursor = () => {
   const oldGetCursorForCell = mxGraph.prototype.getCursorForCell;
   graph.getCursorForCell = function (...args) {
@@ -369,7 +369,7 @@ const setCursor = () => {
 #### 编辑内容
 下面这段代码是编辑内容比较常用的设置
 
-```
+```js
 // 编辑时按回车键不换行，而是完成输入
 this.setEnterStopsCellEditing(true);
 // 编辑时按 escape 后完成输入
@@ -385,7 +385,7 @@ mxCellEditor.prototype.blurEnabled = true;
 通过 `mxCellEditor.prototype.blurEnabled = true` 这行代码设置可以满足我们的需求。
 
 #### 可换行的 label
-````
+````js
 const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
       0.1, 0.65, 80, 16,
       'constituent=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontColor=#e6a23c',
@@ -411,7 +411,7 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 
 导出之后应该得到这样一份 xml
 
-```
+```xml
 <mxGraphModel>
   <root>
     <mxCell id="0"/>
@@ -506,7 +506,7 @@ graph.addListener(mxEvent.CELLS_ADDED, (sender, evt) => {
 
 上面提到过 mxGraph 继承自 mxEventSource，调用父类的 [fireEvent](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxEventSource-js.html#mxEventSource.mxEventSource) 可触发自定义事件。下面是一个简单的例子
 
-```
+```js
 mxGraph.addListener('自定义事件A',()=>{ 
   // do something .....
 });
