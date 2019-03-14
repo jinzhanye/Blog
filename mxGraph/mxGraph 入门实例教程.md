@@ -1,14 +1,14 @@
-在一篇文章 [《记一次绘图框架技术选型: jsPlumb VS mxGraph》](https://segmentfault.com/a/1190000018371243) 中，提到了我为什么要去学习 mxGraph。在入门时我遇到了以下几个问题
+在上一篇文章 [《记一次绘图框架技术选型: jsPlumb VS mxGraph》](https://segmentfault.com/a/1190000018371243) 中，提到了我为什么要去学习 mxGraph。在入门时我遇到了以下几个问题
 
-- 官方文档偏向理论，没能较好地结合代码进行讲解。
-- 虽然官方给出的例子很多，但没有说明阅读顺序，对于那里刚入门的我也不知道应该从哪开始阅读。
-- 通过搜索引擎搜索 “mxGraph教程” 也没有得到太大帮助。
+- 官方文档偏向理论，没能较好地结合代码进行讲解
+- 虽然官方给出的例子很多，但没有说明阅读顺序，对刚入门的我不知道应该从哪开始阅读
+- 通过搜索引擎搜索 “mxGraph教程” 没能得到太大帮助
 
-通过自己对着官司文档死磕了一段时间并在公司项目中进行实践后，慢慢开始掌握这个框架的使用。下面我就根据我的学习经验写一篇比较适合入门的文章。
+通过自己对着官方文档死磕了一段时间并在公司项目中进行实践后，慢慢开始掌握这个框架的使用。下面我就根据我的学习经验写一篇比较适合入门的文章。
 
-[官方](https://jgraph.github.io/mxgraph/)列了比较多文档，其中下面这几份是比较有用的
+[官方](https://jgraph.github.io/mxgraph/)列了比较多文档，其中下面这几份是比较有用的。
 
-- [mxGraph Tutorial](https://jgraph.github.io/mxgraph/docs/tutorial.html)，这份文档主要讲述整个框架的组成，在搜索引擎搜索“mxGraph教程”，一般得出的结果是这份文档的中文翻译
+- [mxGraph Tutorial](https://jgraph.github.io/mxgraph/docs/tutorial.html)，这份文档主要讲述整个框架的组成
 - [mxGraph User Manual – JavaScript Client](https://jgraph.github.io/mxgraph/docs/manual.html)，这份文档对一些重要的概念进行讲解，以及介绍一些重要的 API 
 - [在线实例](https://jgraph.github.io/mxgraph/javascript/index.html)，这些实例的源码都在[这里](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)有
 - [API 文档](https://jgraph.github.io/mxgraph/docs/js-api/files/index-txt.html)，这是最重要的一份文档，在接下来的教程我不会对接口作详细讲述，你可以在这里对相关接口作深入了解
@@ -52,11 +52,10 @@ mxBasePath = '../src';
 
 ![](https://ws1.sinaimg.cn/large/006tKfTcgy1g108qwr0ylj306i0dhaaj.jpg)
 
-再来看看 javascript 目录下有两个 `mxClient.js` 版本。 一个在 `javascript/src/js/mxClient.js` ，另一个在 `javascript/mxClient.js`，后者是前者后的版本。
-所以两者可以替换使用的。如果你的项目是使用 script 标签引入 mxGraph，可以参考[我这个库](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/01.helloworld.html)
+再来看看 javascript 目录下有两个 `mxClient.js` 版本。 一个在 `javascript/src/js/mxClient.js` ，另一个在 `javascript/mxClient.js`，后者是前者打包后的版本，所以两者是可以替换使用的。如果你的项目是使用 script 标签引入 mxGraph，可以参考[我这个库](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/01.helloworld.html)。
 
 ### 模块化引入
-模块化引入可以直接参考我的项目的这个文件 [static/mxgraph/index.js](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/index.js)
+模块化引入可以参考 [pokemon-diagram](https://github.com/jinzhanye/pokemon-diagram) 的这个文件 [static/mxgraph/index.js](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/index.js)
 
 ```js
 /*** 引入 mxgraph ***/
@@ -93,12 +92,12 @@ const {
 } = mxgraph;
 ```
 
-这里有两点需要特别注意的
+这里有两点需要注意的
 
-- `mx` 方法传入的配置项 `mxBasePath` 指向的路径一定要是一个可以通过url访问的静态资源目录。举个例子，
-我项目的 static 目录是个静态资源目录，该目录下有 `mxgraph/css/common.css` 这么个资源，通过`http://localhost:7777` 可以访问我的应用，那么通过 `http://localhost:7777/static/mxgraph/css/common.css` 也应该是可以访问 `common.css` 才对
+- `mx` 方法传入的配置项 `mxBasePath` 指向的路径一定要是一个可以通过 url 访问的静态资源目录。举个例子，
+pokemon-diagram 的 [static 目录](https://github.com/jinzhanye/pokemon-diagram/tree/master/static)是个静态资源目录，该目录下有 `mxgraph/css/common.css` 这么个资源，通过`http://localhost:7777` 可以访问 pokemon-diagram 应用，那么通过 `http://localhost:7777/static/mxgraph/css/common.css` 也应该是可以访问 `common.css` 才对
 
-- 如果你是通过 script 标签引入 mxGraph，是不需要绑定全局变量那段代码的。模块化引入要使用这段代码是因为，mxGraph 这个框架有些代码是通过 window.mxXXX 对以上的属性进行访问的，如果不做全局绑定使用起来会有点问题。
+- 如果你是通过 script 标签引入 mxGraph，是不需要绑定全局变量那段代码的。模块化引入要使用这段代码是因为，mxGraph 这个框架有些代码是通过 window.mxXXX 对以上属性进行访问的，如果不做全局绑定使用起来会有点问题。
 这是官方一个未修复的 BUG，详情可以查阅上面代码注释的 issue
 
 ## 基础知识
@@ -119,7 +118,7 @@ const {
 - 为了保证，假如 try 块内更新失败，endUpdate 也一定被调用，`beginUpdate一定要放到 finally 块`
 - 使用 beginUpdate 与 endUpdate 可提高更新视图性能，框架内部做撤消/重做管理也需要 beginUpdate、endUpdate
 
-你可以试着把这两个方法从代码中删掉，程序还是可以正常运行。
+按照官方这个说明，如果我不需要撤消/重做功能，是不是可以不使用这两个方法呢。我试着把这两个方法从 HelloWorld 例子的代码中删掉，结果程序还是可以正常运行。
 
 ### insertVertex
 
@@ -143,7 +142,7 @@ mxGraph.prototype.insertVertex = function(parent, id, value,
 };
 ```
 
-上面是经简化后的 `insertVertex ` 方法。 `insertVertex ` 做了三件事，先是设置几何信息，然后创建一个节点，最后将这个节点添加到画布。`insertEdge` 与 `insertVertex` 类似，中间过程会调用 `vertex.setEdge(true)` 将 `Cell` 标记为边。从这里我们也可以得知无论`节点`还是`边`在 mxGraph 中都是由 [mxCell](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxCell-js.html#mxCell.mxCell) 类表示，只是在该类内部标识这个 `Cell` 是 `节点` 还是 `边`。
+上面是经简化后的 [insertVertex](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.insertVertex) 方法。 insertVertex  做了三件事，先是设置几何信息，然后创建一个节点，最后将这个节点添加到画布。[insertEdge](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.insertEdge) 与 insertVertex 类似，中间过程会调用 `vertex.setEdge(true)` 将 `Cell` 标记为边。从这里我们也可以得知无论`节点`还是`边`在 mxGraph 中都是由 [mxCell](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxCell-js.html#mxCell.mxCell) 类表示，只是在该类内部标识当前 `Cell` 是 `节点` 还是 `边`。
 
 
 ### mxGeometry
@@ -151,67 +150,66 @@ mxGraph.prototype.insertVertex = function(parent, id, value,
 ```js
 function mxGeometry(x,y,width,height){}
 ```
-`mxGeometry` 类表示 `Cell` 的几何信息，宽高比较好理解，只对节点有意义，对边没意义。下面通过 [02.geometry.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/02.geometry.html) 这个例子说明如`x、y`的作用。
+[mxGeometry](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxGeometry-js.html#mxGeometry.mxGeometry) 类表示 `Cell` 的几何信息，宽高比较好理解，只对节点有意义，对边没意义。下面通过 [02.geometry.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/02.geometry.html) 这个例子说明如`x、y`的作用。
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g10aagk2tmj30g107n3yl.jpg)
 
 `mxGeometry ` 还有一个很重要的布尔属性 `relative`，
 
-- relative 为 false 的节点，表示以画布左上角为基点进行定位，`x、y` 使用的是绝对单位
+- **`relative` 为 `false` 的节点，表示以画布左上角为基点进行定位，`x、y` 使用的是`绝对单位`**
 
 	上一小节提到 `insertVertex` 内部会创建 `mxGeometry` 类。使用 `mxGraph.insertVertex` 会创建一个 `mxGeometry.relative` 为 false 的节点，如 A 节点
 	
 	![](https://jgraph.github.io/mxgraph/docs/images/mx_man_non_relative_pos.png)	
 
-- relative 为 true 的节点，表示以父节点左上角为基点进行定位，`x、y` 使用的是相对单位
+- **`relative` 为 `true` 的节点，表示以父节点左上角为基点进行定位，`x、y` 使用的是`相对单位`**
 
-	使用 `mxGraph.insertVertex` 会创建一个 relative 为 false 的节点。如果你要将一个节点添加到另一个节点中需要在该方法调用的第9个参数传入 true，将 relative 设置为 true。这时子节点使用相对坐标系，以父节点左上角作为基点，x、y 取值范围都是 \[-1,1]。如 C节点 相对 B节点定位。
+	使用 `mxGraph.insertVertex` 会创建一个 relative 为 false 的节点。如果你要将一个节点添加到另一个节点中需要在该方法调用的第9个参数传入 `true`，将 `relative` 设置为 `true`。这时子节点使用相对坐标系，以父节点左上角作为基点，x、y 取值范围都是 `[-1,1]`。如 C节点 相对 B节点定位。
 
 	![](https://jgraph.github.io/mxgraph/docs/images/mx_man_rel_vert_pos.png)
 
-- relative为 true 的边，`x、y` 用于定位 label
+- **`relative` 为 `true` 的边，`x、y` 用于定位 label**
 
 	使用 `mxGraph.insertEdge` 会创建一条 relative 为 true 的边。x、y 用于定位线条上的 label，
-x 取值范围是 [-1,1]，-1 为起点，0 为中点，1 为终点。y 表示线条的正交线距离。第三个例子能帮忙大家理解这种情况。
+x 取值范围是 `[-1,1]`，`-1 为起点，0 为中点，1 为终点`。y 表示 label 在边的正交线上移到的距离。第三个例子能帮忙大家理解这种情况。
 
 	![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0z65fc7a7j308v063dft.jpg)
 
 
 	```js
 	const e1 = graph.insertEdge(parent, null, '30%', v1, v2);
-	e1.geometry.x = -0.5; // [-1,1] 调整 label 沿连接线的位置
-	e1.geometry.y = 100; // 调整label 在正交线上的距离
+	e1.geometry.x = 1;
+	e1.geometry.y = 100;
 	```
 
 ### 设置样式
 ![](https://jgraph.github.io/mxgraph/docs/images/mx_man_styles.png)
 
-查看 [03.stylesheet.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/03.stylesheet.html)，我们知道 mxGraph 提供两种设置样式的方式。
+由 [03.stylesheet.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/03.stylesheet.html) 这个例子我们得知 mxGraph 提供两种设置样式的方式。
 
-第一种是设置全局样式。[mxStylesheet](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.mxStylesheet) 类用于管理图形样式，通过 [graph.getStylesheet()](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getStylesheet) 可以获取当前图形的 `mxStylesheet` 对象。`mxStylesheet` 对象的 `styles` 属性也是一个对象，该对象默认情况下包含两个对象`defaultVertexStyle、defaultEdgeStyle`，修改这两个对象里的样式属性对所有线条/节点都生效。
+第一种是设置`全局样式`。[mxStylesheet](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.mxStylesheet) 类用于管理图形样式，通过 [graph.getStylesheet()](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getStylesheet) 可以获取当前图形的 `mxStylesheet` 对象。`mxStylesheet` 对象的 `styles` 属性也是一个对象，该对象默认情况下包含两个对象`defaultVertexStyle、defaultEdgeStyle`，修改这两个对象里的样式属性`对所有线条/节点都生效`。
 
-第二种是对样式进行命名，然后使用 [mxStylesheet.putCellStyle](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.putCellStyle) 方法为 `mxStylesheet.styles` 添加样式对象。在添加 Cell 的时候，将样式写在参数中。格式如下
+第二种是`命名样式`。先创建一个样式对象，然后使用 [mxStylesheet.putCellStyle](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.putCellStyle) 方法为 `mxStylesheet.styles` 添加该样式对象并命名。在添加 Cell 的时候，将样式写在参数中。格式如下
 
 ```
 [stylename;|key=value;]
 ```
 
-分号前可以跟自定义样式名称或者一个样式 key、value 对。
+分号前可以跟命名样式名称或者一个样式的 key、value 对。
 
-`ROUNDED` 是一个内置的命名样式，对节点设置有圆角效果，对边设置则边的拐弯处是圆角。
+`ROUNDED` 是一个内置的命名样式，对节点设置有圆角效果，对边设置则边的拐弯处为圆角。
 
 例子中设置折线有一个需要注意的地方
 
 ```js
-// 设置拖拽线的过程出现折线，默认为直线
+// 设置拖拽边的过程出现折线，默认为直线
 graph.connectionHandler.createEdgeState = function () {
   const edge = this.createEdge();
   return new mxCellState(graph.view, edge, graph.getCellStyle(edge));
 };
 ```
 
-
-虽然调用 `insertEdge` 方法时已经设置了线条为折线，但是在拖拽边过程中依然是直线。上面这段代码重写了 `createEdgeState` 方法，将拖动中的边样式设置成与静态时的边样式一致，都是折线。
+虽然调用 `insertEdge` 方法时已经设置了线条为折线，但是在拖拽边过程中依然是直线。上面这段代码重写了 [createEdgeState](https://jgraph.github.io/mxgraph/docs/js-api/files/handler/mxConnectionHandler-js.html#mxConnectionHandler.createEdgeState) 方法，将拖动中的边样式设置成与静态时的边样式一致，都是折线。
 
 #### 查看样式效果小技巧
 
@@ -224,7 +222,7 @@ mxGraph 所有样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/fil
 为了方便观察我手动格式化了样式，注意最后一行以 `entry` 或 `exit` 开头的样式代表的是边出口/入口的靶点坐标，下一小节会进行讲解。
 
 
-### Anchor
+### 靶点
 关于如何设置靶点可以参考 [04.anchors.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/04.anchors.html) ，下面也是以这个 Demo 进行讲解两个用户操作的例子，对比不同的操作对于获取靶点信息的影响。
 
 将鼠标悬浮中 A 节点中心，待节点高亮时连接到 B 节点的一个靶点上
@@ -236,7 +234,7 @@ mxGraph 所有样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/fil
 
 ![](https://ws4.sinaimg.cn/large/006tKfTcgy1g11f728kyij30ch04gwec.jpg)
 
-可以看到如果从图形中心拖出线条，这时边的出口值 `exit` 为空，只有入口值 `entry`。如果拖动节点 mxGraph 会智能地调整线条出口方向。如节点 A 的连接靶点原来是在右边，节点拖动到节点 B 右边后靶点也跟着发生了变化，而节点 B 的连接靶点一直没变。
+可以看到如果从图形中心拖出线条，这时边的出口值 `exit` 为空，只有入口值 `entry`。如果拖动节点 mxGraph 会智能地调整线条出口方向。如节点 A 的连接靶点原来是在右边，节点拖动到节点 B 右边后靶点也跟着发生了变化，跑到了左边，而节点 B 的连接靶点一直没变。
 
 这次将鼠标悬浮到 A 节点的一个靶点，待靶点高亮时连接到 B 节点的一个靶点上
 
@@ -310,11 +308,13 @@ graph.selectCellForEvent = function (cell) {
 
 [selectCellForEvent](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.selectCellForEvent) 其实是 `getInitialCellForEvent` 内部调用的一个方法。这个方法的作用是将 cell 设置为 `selectionCell`，设置后可通过 [mxGraph.getSelectionCell](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getSelectionCell) 可获取得该节点。与 `getInitialCellForEvent` 同理，如果不使用父节点替换，则 `mxGraph.getSelectionCell ` 获取到的会是子节点。项目实战我们会使用到 `mxGraph.getSelectionCell ` 这个接口。
 
+只所以产生这样的差异是因为第一个例子的边是从节点中心拖出的，并没有出口靶点的信息，而第二个例子则是明确地从一个靶点中拖出一条边。
+
 ## 项目实战
 这部分我主要挑一些这个[项目](https://github.com/jinzhanye/pokemon-diagram)比较重要的点进行讲解。
 
 ### 写一个节点组合
-下面以项目的这个节点为例，讲解一下如何组合节点
+下面以项目的这个节点为例，讲解如何组合节点
 
 ![](https://ws1.sinaimg.cn/large/006tKfTcgy1g125jqw96cj3035042aa5.jpg)
 
@@ -378,10 +378,9 @@ mxCellEditor.prototype.escapeCancelsEditing = false;
 mxCellEditor.prototype.blurEnabled = true;
 ```
 
-默认情况下输入内容时如果按回车键内容会换行，但有些业务场景禁止换行，回车表示完成输入，通过[graph.setEnterStopsCellEditing(true)](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.setEnterStopsCellEditing) 设置可以满足需求。
+默认情况下输入内容时如果按回车键内容会换行，但有些场景有禁止换行的需求，希望回车后完成输入，通过[graph.setEnterStopsCellEditing(true)](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.setEnterStopsCellEditing) 设置可以满足需求。
 
-重点说说这个属性 [mxCellEditor.prototype.blurEnabled](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxCellEditor-js.html#mxCellEditor.blurEnabled)，默认情况下如果用户在输入内容时鼠标点击了画布之外的不可聚焦区域(div、section、article等)，节点内的编辑器是不会失焦的，
-这导致了 [LABEL_CHANGED](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.mxEvent.LABEL_CHANGED) 事件不会被触发。但在实际项目开发中一般我们会期望，如果用户在输入内容时鼠标点击了画布之外的地方就应该算作完成一次输入，然后通过被触发的 `LABEL_CHANGED` 事件将修改后的内容同步到服务端。
+重点说说 [mxCellEditor.prototype.blurEnabled](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxCellEditor-js.html#mxCellEditor.blurEnabled) 这个属性，默认情况下如果用户在输入内容时鼠标点击了画布之外的不可聚焦区域(div、section、article等)，节点内的编辑器是不会失焦的，这导致了 [LABEL_CHANGED](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.mxEvent.LABEL_CHANGED) 事件不会被触发。但在实际项目开发中一般我们会期望，如果用户在输入内容时鼠标点击了画布之外的地方就应该算作完成一次输入，然后通过被触发的 `LABEL_CHANGED` 事件将修改后的内容同步到服务端。
 通过 `mxCellEditor.prototype.blurEnabled = true` 这行代码设置可以满足我们的需求。
 
 #### 可换行的 label
@@ -396,7 +395,7 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmmixmizj30lg095abj.jpg)
 
-要设置换行需要做两件事，第一是通过这行代码 [mxGraph.setHtmlLabels(true)](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.setHtmlLabels)，使用 html 渲染文本(mxGraph 默认使用 svg的text 标签渲染文本)。第二是像上面的 titleVertex 的样式设置一样，添加一句 [whiteSpace=wrap](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html#mxConstants.STYLE_WHITE_SPACE)
+要设置换行需要做两件事，第一是通过这行代码 [mxGraph.setHtmlLabels(true)](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.setHtmlLabels)，使用 html 渲染文本(mxGraph 默认使用 svg的text 标签渲染文本)。第二是像上面的 titleVertex 的样式设置一样，添加一句 [whiteSpace=wrap](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxConstants-js.html#mxConstants.STYLE_WHITE_SPACE)。
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g0xmcy67uaj30mj0fedj4.jpg)
 
@@ -454,7 +453,7 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 </mxCell>
 ```
 
-导出 xml 时，控制台打印一个 mxGraphModel 对象。对比上面的 xml 与 下图的节点对象，可以发现它们只是同一个 Model 的不同表现形式，xml 正是将 [mxGraph.model](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.model) 格式化而成的。
+如果你现在运行着项目，导出 xml 时，控制台应该会打印一个 mxGraphModel 对象。对比上面的 xml 与 下图的节点对象，可以发现它们只是同一个 Model 的不同表现形式，xml 正是将 [mxGraph.model](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.model) 格式化而成的。
 
 ![](https://ws4.sinaimg.cn/large/006tKfTcgy1g1263c6n0fj30dd0e140f.jpg)
 
