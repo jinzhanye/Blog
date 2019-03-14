@@ -283,28 +283,23 @@ graph.recursiveResize = true;
 /**
  * Redirects start drag to parent.
  */
-var graphHandlerGetInitialCellForEvent = mxGraphHandler.prototype.getInitialCellForEvent;
-mxGraphHandler.prototype.getInitialCellForEvent = function(me)
-{
-    var cell = graphHandlerGetInitialCellForEvent.apply(this, arguments);
-
-    if (this.graph.isPart(cell))
-    {
-        cell = this.graph.getModel().getParent(cell)
-    }
-
-    return cell;
+const getInitialCellForEvent = mxGraphHandler.prototype.getInitialCellForEvent;
+mxGraphHandler.prototype.getInitialCellForEvent = function (me) {
+  let cell = getInitialCellForEvent.apply(this, arguments);
+  if (this.graph.isPart(cell)) {
+    cell = this.graph.getModel().getParent(cell);
+  }
+  return cell;
 };
 
 // Redirects selection to parent
-graph.selectCellForEvent = function(cell)
-{
-    if (this.isPart(cell))
-    {
-        /*改变参数 arguments 会发生变化*/
-        cell = this.model.getParent(cell);
-    }
-    mxGraph.prototype.selectCellForEvent.apply(this, arguments);
+graph.selectCellForEvent = function (cell) {
+  if (this.isPart(cell)) {
+    mxGraph.prototype.selectCellForEvent.call(this, this.model.getParent(cell));
+    return;
+  }
+
+  mxGraph.prototype.selectCellForEvent.apply(this, arguments);
 };
 ```
 
@@ -316,7 +311,7 @@ graph.selectCellForEvent = function(cell)
 [selectCellForEvent](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.selectCellForEvent) 其实是 `getInitialCellForEvent` 内部调用的一个方法。这个方法的作用是将 cell 设置为 `selectionCell`，设置后可通过 [mxGraph.getSelectionCell](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getSelectionCell) 可获取得该节点。与 `getInitialCellForEvent` 同理，如果不使用父节点替换，则 `mxGraph.getSelectionCell ` 获取到的会是子节点。项目实战我们会使用到 `mxGraph.getSelectionCell ` 这个接口。
 
 ## 项目实战
-这部分我主要挑一些这个项目比较重要的点进行讲解。
+这部分我主要挑一些这个[项目](https://github.com/jinzhanye/pokemon-diagram)比较重要的点进行讲解。
 
 ### 写一个节点组合
 下面以项目的这个节点为例，讲解一下如何组合节点
@@ -347,22 +342,26 @@ const insertVertex = (dom) => {
 };
 ```
 
-单单 `nodeRootVertex` 就是长这个样子。通过设置自定义的 `node` 样式( 见 Graph 类 xxx方法  )与 `image` 属性设置图片路径配合完成。
+单单 `nodeRootVertex` 就是长这个样子。通过设置自定义的 `node` 样式(见 [Graph](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/Graph.js) 类 _putVertexStyle 方法)与 `image` 属性设置图片路径配合完成。
 
 ![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0xqbyl8ovj304t04tglm.jpg)
 
 因为默认情况下一个节点只能有一个文本区和一个图片区，要增加额外的文本和图片就需要组合节点。
-在这个基础上加上一个 `titleVertex` 文本节点，还有一个 `normalTypeVertex` 图片节点，最终达到这个效果
+在 `nodeRootVertex` 上加上 `titleVertex` 文本节点和 `normalTypeVertex` 图片节点，最终达到这个效果。
 
 ![](https://ws1.sinaimg.cn/large/006tKfTcgy1g125qbf1u0j3098085mxl.jpg)
 
 
-有时需要为不同子节点设置不同的鼠标悬浮图标，可以参考 xxx，通过一个自定义的标识实现这个
+有时需要为不同子节点设置不同的鼠标悬浮图标，如本项目鼠标悬浮到 `normalTypeVertex ` 时鼠标变为手形，参考 AppCanvas.vue 的 setCursor 方法，重写 `mxGraph.prototype.getCursorForCell` 可以实现这个功能。
 
 ```
 const setCursor = () => {
-  graph.getCursorForCell = (cell) => {
-    return cell.style.includes('normalType') ? 'pointer' : 'default';
+  const oldGetCursorForCell = mxGraph.prototype.getCursorForCell;
+  graph.getCursorForCell = function (...args) {
+    const [cell] = args;
+    return cell.style.includes('normalType') ?
+      'pointer' :
+      oldGetCursorForCell.apply(this, args);
   };
 };
 ```
@@ -406,7 +405,7 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 ### Model
 现在介绍一下 Model 这个概念，Model 是当前图形的数据结构化表示。[mxGraphModel](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxGraphModel-js.html) 封装了 Model 的相关操作。
 
-你可以启动项目，画一个这样的图。为了保证导出的 xml 与下面的一致，需要先拖出智爷，再拖出皮卡丘，最后连接边。
+你可以启动项目，画一个这样的图。为了保证导出的 xml 与下面的一致，需要先拖出智爷，再拖出超级皮卡丘，最后连接边。
 
 ![](https://ws4.sinaimg.cn/large/006tKfTcgy1g125t4y85jj30bp0ftwfb.jpg)
 
@@ -461,7 +460,7 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 
 ### 事件
 
-本项目监听事件写在 [AppCanvas.vue](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/pages/AppCanvas.vue) 的 _listenEvent 方法，可以在这个方法了解一些常用的事件。下图来自 [mxGraph ](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph) 类的方法调用依赖图，我们也可以从这里看出整个框架的事件流动
+本项目监听事件写在 [AppCanvas.vue](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/pages/AppCanvas.vue) 的 _listenEvent 方法，可以在这个方法了解一些常用的事件。下图来自 [mxGraph ](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph) 类的方法调用依赖图，我们可以从这里看出整个框架的事件流动。
 
 ![](https://jgraph.github.io/mxgraph/docs/js-api/images/images/callgraph.png)
 
@@ -469,9 +468,9 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 
 本项目的 _listenEvent 方法用到两个事件监听对象。
 
-[mxGraph](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html) 继承自 [mxEventSource](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxEventSource-js.html#mxEventSource.mxEventSource)，使用父类的 [addListener](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxEventSource-js.html#mxEventSource.addListener) 方法可以将自身当作一个事件中心进行订阅/广播事件。
+- [mxGraph](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html) 继承自 [mxEventSource](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxEventSource-js.html#mxEventSource.mxEventSource)，使用父类的 [addListener](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxEventSource-js.html#mxEventSource.addListener) 方法可以将自身当作一个事件中心进行订阅/广播事件。
 
-[mxGraph.getSelectionModel()](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getSelectionModel) 返回一个 [mxGraphSelectionModel](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraphSelectionModel-js.html#mxGraphSelectionModel.mxGraphSelectionModel) 对象，这个对象也是继承自 `mxEventSource` 有 `mxEvent.UNDO、mxEvent.CHANGE` 两个事件，通过监听 `mxEvent.CHANGE` 事件可以获取当前被选中的 `Cell`。
+- [mxGraph.getSelectionModel()](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getSelectionModel) 返回一个 [mxGraphSelectionModel](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraphSelectionModel-js.html#mxGraphSelectionModel.mxGraphSelectionModel) 对象，这个对象也是继承自 `mxEventSource` 有 `mxEvent.UNDO、mxEvent.CHANGE` 两个事件，通过监听 `mxEvent.CHANGE` 事件可以获取当前被选中的 `Cell`。
 
 #### ADD\_CELLS 与 CELLS\_ADD 的区别
 ![](https://ws1.sinaimg.cn/large/006tKfTcgy1g0xo1ow1p0j30id010gls.jpg)
@@ -479,29 +478,29 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 `mxGraph` 类有很多 `XXX_CELLS`、`CELLS_XXXED` 这种形式的事件，这部分我还没弄懂，下面仅以添加事件为例探讨这两类事件的区别。
 
 - 添加 `Cell` 的时候会触发两个事件 `ADD_CELLS`、`CELLS_ADDED`， 先触发 `CELLS_ADDED` 后触发 `ADD_CELLS`。
-- `ADD_CELLS` 在 `addCells` 方法中触发，而 `CELLS_ADDED` 在 `cellsAdded` 方法中触发。而对于 `addCells` 与 `cellsAdded` 官方文档也只是两个句的说明，体现不出多大区别。按经验而言后触发的事件会携带更多的信息，所以平时开发我会监听`ADD_CELLS` 事件。`MOVE_CELLS、CELLS_MOVED`、`REMOVE_CELLS、CELLS_REMOVED` 等事件与此类似。
+- `ADD_CELLS` 在 `addCells` 方法中触发，而 `CELLS_ADDED` 在 `cellsAdded` 方法中触发。而对于 [addCells](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.addCells) 与 [cellsAdded](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.cellsAdded) 官方文档的说明并不能体现出两者的区别，再深究下去就要查阅源码了。按经验而言后触发的事件会携带更多的信息，所以平时开发我会监听 `ADD_CELLS` 事件。`MOVE_CELLS、CELLS_MOVED`、`REMOVE_CELLS、CELLS_REMOVED` 等事件与此类似。
 
 #### 监听 Cell 添加事件
 
 从上面的方法调用依赖图中我们可以看到，`insertVertex`、`insertEdge` 最终都被当作 `Cell` 处理，在后续触发的事件也没有对 `节点/边` 进行区分，而是统一当作 `Cell` 事件。
 所以对于一个 `Cell` 添加事件，需要自己区别是添加了节点还是添加了边。
 
-```
-      graph.addListener(mxEvent.CELLS_ADDED, (sender, evt) => {
-        const cell = evt.properties.cells[0];
-        if (graph.isPart(cell)) {
-          return;
-        }
+```js
+graph.addListener(mxEvent.CELLS_ADDED, (sender, evt) => {
+  const cell = evt.properties.cells[0];
+  if (graph.isPart(cell)) {
+    return;
+  }
 
-        if (cell.vertex) {
-          this.$message.info('添加了一个节点');
-        } else if (cell.edge) {
-          this.$message.info('添加了一条线');
-        }
-      });
+  if (cell.vertex) {
+    this.$message.info('添加了一个节点');
+  } else if (cell.edge) {
+    this.$message.info('添加了一条线');
+  }
+});
 ```
 
-还有就是对于子节点添加到父节点的情况(如本项目将 `titleVertex` 、`normalTypeVertex` 添加到`nodeRootVertex`)也是会触发 `Cell` 添加事件的。通常对于这些子节点不作处理，可以像 [05.consistuent.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/05.consistuent.html) 一样用一个 `isPart` 判断过滤掉。
+还有就是对于子节点添加到父节点的情况(如本项目将 titleVertex 、normalTypeVertex 添加到 nodeRootVertex)也是会触发 `Cell` 添加事件的。通常对于这些子节点不作处理，可以像 [05.consistuent.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/05.consistuent.html) 一样用一个 `isPart` 判断过滤掉。
 
 #### 自定义事件
 
@@ -515,14 +514,14 @@ mxGraph.addListener('自定义事件A',()=>{
 mxGraph.fireEvent(new mxEventObject('自定义事件A');
 ```
 
-在本项目 [Graph](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/Graph.js) 类的 _configCustomEvent 方法我也实现了两个自定义了事件。当边开始拖动时会触发 `EDGE_START_MOVE` 事件，当节点开始拖动时会触发 `VERTEX_START_MOVE` 事件。
+在本项目 [Graph](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/Graph.js) 类的 _configCustomEvent 方法我也实现了两个自定义事件。当边开始拖动时会触发 `EDGE_START_MOVE` 事件，当节点开始拖动时会触发 `VERTEX_START_MOVE` 事件。
 
 ### 导出图片
 mxGraph 导出图片的思路是先在前端导出图形的 xml 及计算图形的宽高，然后将 xml、宽、高，这有三项数据发送给服务端，服务端也使用 mxGraph 提供的 API 将 xml 转换成图片。服务端如果是使用 Java 可以参考官方这个[例子](https://github.com/jgraph/mxgraph/blob/master/java/test/com/mxgraph/test/mxImageExportTest.java)，下面主要介绍前端需要做的工作。
 
 导出图片可以使用 [mxImageExport](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxImageExport-js.html#mxImageExport.mxImageExport) 类，该类的文档有一段可以直接拿来使用的代码。
 
-```
+```js
 // ...
 var xmlCanvas = new mxXmlCanvas2D(root);
 var imgExport = new mxImageExport();
@@ -539,7 +538,7 @@ var xml = mxUtils.getXml(root);
 但这段代码会将整块画布截图，而不是以最左上角的元素及最右下角的元素作为边界截图。如果你有以元素作为边界的需求，
 则需要调用 [xmlCanvas.translate](https://jgraph.github.io/mxgraph/docs/js-api/files/util/mxXmlCanvas2D-js.html#mxXmlCanvas2D.translate) 调整裁图边界。
 
-```
+```js
 //.....
 var xmlCanvas = new mxXmlCanvas2D(root);
 xmlCanvas.translate(
