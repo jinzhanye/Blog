@@ -1,3 +1,5 @@
+![](https://ws2.sinaimg.cn/large/006tKfTcgy1g12ofoq7i6j30pz0dgwff.jpg)
+
 在上一篇文章 [《记一次绘图框架技术选型: jsPlumb VS mxGraph》](https://segmentfault.com/a/1190000018371243) 中，提到了我为什么要去学习 mxGraph。在入门时我遇到了以下几个问题
 
 - 官方文档偏向理论，没能较好地结合代码进行讲解
@@ -404,58 +406,46 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 ### Model
 现在介绍一下 Model 这个概念，Model 是当前图形的数据结构化表示。[mxGraphModel](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxGraphModel-js.html) 封装了 Model 的相关操作。
 
-你可以启动项目，画一个这样的图。为了保证导出的 xml 与下面的一致，需要先拖出智爷，再拖出超级皮卡丘，最后连接边。
+你可以启动项目，画一个这样的图，然后点击输出XML。为了保的 xml 与下面的一致，需要先拖出智爷，再拖出超级皮卡丘，最后连接边。
 
-![](https://ws4.sinaimg.cn/large/006tKfTcgy1g125t4y85jj30bp0ftwfb.jpg)
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g12otg7fgmj30i507p0th.jpg)
 
-导出之后应该得到这样一份 xml
+控制台应该输出这样一份 xml
 
 ```xml
 <mxGraphModel>
   <root>
     <mxCell id="0"/>
     <mxCell id="1" parent="0"/>
-    <mxCell id="4" value="Hello" style="node;image=/static/images/ele/ele-005.png" vertex="1" parent="1">
-      <mxGeometry x="470" y="50" width="100" height="135" as="geometry"/>
-      <Object normalType="water.png" as="data">
-        <Object id="5" icon="ele-005.png" title="智爷" as="element"/>
-      </Object>
+    <mxCell id="4" value="Hello" style="node;image=/static/images/ele/ele-005.png" vertex="1" data="{&quot;id&quot;:1,&quot;element&quot;:{&quot;id&quot;:1,&quot;icon&quot;:&quot;ele-005.png&quot;,&quot;title&quot;:&quot;智爷&quot;},&quot;normalType&quot;:&quot;water.png&quot;}" parent="1">
+      <mxGeometry x="380" y="230" width="100" height="135" as="geometry"/>
     </mxCell>
-    ...........
+    ........
   </root>
 </mxGraphModel>
 ```
 
-每一个 mxCell 节点都有 parent 属性指向父节点。我们对 value="Hello" 的那个 mxCell 节点手动格式化
+每一个 mxCell 节点都有 parent 属性指向父节点。我们对 value="Hello" 这个 mxCell 节点手动格式化。
 
 ```xml
 <mxCell 
-	id="4" 
-	value="Hello" 
-	style="node;image=/static/images/ele/ele-005.png" 
-	vertex="1" 
-	parent="1">
+    id="4" 
+    value="Hello" 
+    style="node;image=/static/images/ele/ele-005.png" 
+    vertex="1" 
+    data="{&quot;id&quot;:1,&quot;element&quot;:{&quot;id&quot;:1,&quot;icon&quot;:&quot;ele-005.png&quot;,&quot;title&quot;:&quot;智爷&quot;},&quot;normalType&quot;:&quot;water.png&quot;}" 
+    parent="1">
   <mxGeometry 
-  		x="470" 
-  		y="50" 
-  		width="100" 
-  		height="135" 
-  		as="geometry"/>
-  <Object 
-  		normalType="water.png" 
-  		as="data">
-    <Object 
-    		id="5" 
-    		icon="ele-005.png" 
-    		title="智爷" 
-          as="element"/>
-  </Object>
+    x="380" 
+    y="230" 
+    width="100" 
+    height="135" as="geometry"/>
 </mxCell>
 ```
 
-如果你现在运行着项目，导出 xml 时，控制台应该会打印一个 mxGraphModel 对象。对比上面的 xml 与 下图的节点对象，可以发现它们只是同一个 Model 的不同表现形式，xml 正是将 [mxGraph.model](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.model) 格式化而成的。
+data 值是原对象经 JSON.stringify 得到的，经转义后就变成了上面的样子。控制台还打印了一个 mxGraphModel 对象，对比上面的 xml 与 下图的节点对象，可以发现它们只是同一个 Model 的不同表现形式，xml 正是将 [mxGraph.model](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.model) 格式化而成的。
 
-![](https://ws4.sinaimg.cn/large/006tKfTcgy1g1263c6n0fj30dd0e140f.jpg)
+![](https://ws3.sinaimg.cn/large/006tKfTcgy1g12oyl198cj30og0f541b.jpg)
 
 ### 事件
 
