@@ -15,7 +15,7 @@
 
 在看完我的文章后希望系统地学习 mxGraph 还是要去阅读这些文档的，现在可以暂时不看。因为刚开始就堆这么多理论性的东西，对入门没有好处。
 
-这篇教程分为两部分，第一部分主要结合[官网的例子](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)讲解一些基础知识。第二部分则利用第一部分讲解的知识开发一个小项目 [pokemon-diagram](https://github.com/jinzhanye/pokemon-diagram)。本教程会使用到 ES6 语法，而第二部分的项目是用 Vue 写的。阅读本教程需要你会这两项预备知识。
+这篇教程分为两部分，第一部分结合我写的[一些例子](https://github.com/jinzhanye/mxgraph-demos)讲解基础知识。第二部分则利用第一部分讲解的知识开发一个小项目 [pokemon-diagram](https://github.com/jinzhanye/pokemon-diagram)。本教程会使用到 ES6 语法，而第二部分的项目是用 Vue 写的。阅读本教程需要你掌握这两项预备知识。
 
 ## 引入
 ### 使用 script 引入
@@ -53,7 +53,7 @@ mxBasePath = '../src';
 ![](https://ws1.sinaimg.cn/large/006tKfTcgy1g108qwr0ylj306i0dhaaj.jpg)
 
 再来看看 javascript 目录下有两个 `mxClient.js` 版本。 一个在 `javascript/src/js/mxClient.js` ，另一个在 `javascript/mxClient.js`，后者是前者后的版本。
-所以两者可以替换使用的。如果你的项目是使用 script 标签引入 mxGraph，可以参考[我这个库](https://github.com/jinzhanye/learn-mxgraph/blob/master/demo/01.helloworld.html)
+所以两者可以替换使用的。如果你的项目是使用 script 标签引入 mxGraph，可以参考[我这个库](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/01.helloworld.html)
 
 ### 模块化引入
 模块化引入可以直接参考我的项目的这个文件 [static/mxgraph/index.js](https://github.com/jinzhanye/pokemon-diagram/blob/master/src/graph/index.js)
@@ -102,7 +102,7 @@ const {
 这是官方一个未修复的 BUG，详情可以查阅上面代码注释的 issue
 
 ## 基础知识
-这部分会使用到[官网的例子](https://github.com/jgraph/mxgraph/tree/master/javascript/examples)，及我自己编写的[一些例子](https://github.com/jinzhanye/learn-mxgraph)。大家可以先把代码下载下来，这些例子都是不需要使用 node 运行的，直接双击打开文件在浏览器运行即可。
+这部分会使用到我自己编写的[一些例子](https://github.com/jinzhanye/mxgraph-demos)。大家可以先把代码下载下来，这些例子都是不需要使用 node 运行的，直接双击打开文件在浏览器运行即可。
 
 ### Cell
 `Cell` 在 mxGraph 中可以代表`组(Group)`、`节点(Vertex)`、`边(Edge)`，[mxCell](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxCell-js.html#mxCell.mxCell) 这个类封装了 `Cell` 的操作，本教程不涉及到`组`的内容。下文若出现 `Cell` 字眼可以当作 `节点` 或 `边`。
@@ -151,7 +151,7 @@ mxGraph.prototype.insertVertex = function(parent, id, value,
 ```
 function mxGeometry(x,y,width,height){}
 ```
-`mxGeometry` 类表示 `Cell` 的几何信息，宽高比较好理解，只对节点有意义，对边没意义。下面通过 [08.geometry.html](https://github.com/jinzhanye/learn-mxgraph/blob/master/demo/08.geometry.html) 这个例子说明如`x、y`的作用。
+`mxGeometry` 类表示 `Cell` 的几何信息，宽高比较好理解，只对节点有意义，对边没意义。下面通过 [02.geometry.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/02.geometry.html) 这个例子说明如`x、y`的作用。
 
 ![](https://ws2.sinaimg.cn/large/006tKfTcgy1g10aagk2tmj30g107n3yl.jpg)
 
@@ -186,7 +186,7 @@ x 取值范围是 [-1,1]，-1 为起点，0 为中点，1 为终点。y 表示�
 ### 设置样式
 ![](https://jgraph.github.io/mxgraph/docs/images/mx_man_styles.png)
 
-查看 xx 例子，我们知道 mxGraph 提供两种设置样式的方式。
+查看 [03.stylesheet.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/03.stylesheet.html)，我们知道 mxGraph 提供两种设置样式的方式。
 
 第一种是设置全局样式。[mxStylesheet](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxStylesheet-js.html#mxStylesheet.mxStylesheet) 类用于管理图形样式，通过 [graph.getStylesheet()](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.getStylesheet) 可以获取当前图形的 `mxStylesheet` 对象。`mxStylesheet` 对象的 `styles` 属性也是一个对象，该对象默认情况下包含两个对象`defaultVertexStyle、defaultEdgeStyle`，修改这两个对象里的样式属性对所有线条/节点都生效。
 
@@ -202,11 +202,11 @@ x 取值范围是 [-1,1]，-1 为起点，0 为中点，1 为终点。y 表示�
 
 例子中设置折线有一个需要注意的地方
 
-```
+```js
 // 设置拖拽线的过程出现折线，默认为直线
-this.connectionHandler.createEdgeState = () => {
+graph.connectionHandler.createEdgeState = function () {
   const edge = this.createEdge();
-  return new mxCellState(this.view, edge, this.getCellStyle(edge));
+  return new mxCellState(graph.view, edge, graph.getCellStyle(edge));
 };
 ```
 
@@ -225,7 +225,7 @@ mxGraph 所有样式在[这里](https://jgraph.github.io/mxgraph/docs/js-api/fil
 
 
 ### Anchor
-关于如何设置靶点可以参考 xxan.html ，下面也是以这个 Demo 进行讲解两个用户操作的例子，对比不同的操作对于获取靶点信息的影响。
+关于如何设置靶点可以参考 [04.anchors.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/04.anchors.html) ，下面也是以这个 Demo 进行讲解两个用户操作的例子，对比不同的操作对于获取靶点信息的影响。
 
 将鼠标悬浮中 A 节点中心，待节点高亮时连接到 B 节点的一个靶点上
 
@@ -263,21 +263,21 @@ mxFoo.prototype.bar = function (...args)=> {
 
 ### 节点组合
 
-这一小节通过 constituent 这个例子，讲解节点组合需要注意的地方
+这一小节通过 [05.consistuent.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/05.consistuent.html) 这个例子，讲解节点组合需要注意的地方。
 
-组合节点后默认情况下，父节点是可折叠的，要关闭折叠功能需要将 `foldingEnabled` 设为 `false`
+组合节点后默认情况下，父节点是可折叠的，要关闭折叠功能需要将 `foldingEnabled` 设为 `false`。
 
 ```js
 graph.foldingEnabled = false;
 ```
 
-如果希望在改变父节点尺寸时，子节点与父节点等比例缩放，需要开启 `recursiveResize`
+如果希望在改变父节点尺寸时，子节点与父节点等比例缩放，需要开启 `recursiveResize`。
 
 ```js
 graph.recursiveResize = true;
 ```
 
-下面是这个例子最重要的两段代码
+下面是这个例子最重要的两段代码。
 
 ```js
 /**
@@ -321,7 +321,7 @@ graph.selectCellForEvent = function(cell)
 ### 写一个节点组合
 下面以项目的这个节点为例，讲解一下如何组合节点
 
-todo 加图片
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g125jqw96cj3035042aa5.jpg)
 
 
 ```js
@@ -354,7 +354,7 @@ const insertVertex = (dom) => {
 因为默认情况下一个节点只能有一个文本区和一个图片区，要增加额外的文本和图片就需要组合节点。
 在这个基础上加上一个 `titleVertex` 文本节点，还有一个 `normalTypeVertex` 图片节点，最终达到这个效果
 
-![](https://ws4.sinaimg.cn/large/006tKfTcgy1g0xkrsphwyj30cv09x3yv.jpg)
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1g125qbf1u0j3098085mxl.jpg)
 
 
 有时需要为不同子节点设置不同的鼠标悬浮图标，可以参考 xxx，通过一个自定义的标识实现这个
@@ -406,9 +406,9 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 ### Model
 现在介绍一下 Model 这个概念，Model 是当前图形的数据结构化表示。[mxGraphModel](https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxGraphModel-js.html) 封装了 Model 的相关操作。
 
-你可以启动项目，画一个这样的图
+你可以启动项目，画一个这样的图。为了保证导出的 xml 与下面的一致，需要先拖出智爷，再拖出皮卡丘，最后连接边。
 
-![](https://ws3.sinaimg.cn/large/006tKfTcgy1g0xy1zmmqrj30f10gb0tn.jpg)
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g125t4y85jj30bp0ftwfb.jpg)
 
 导出之后应该得到这样一份 xml
 
@@ -417,8 +417,8 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
   <root>
     <mxCell id="0"/>
     <mxCell id="1" parent="0"/>
-    <mxCell id="4" value="男1号" style="node;image=/static/images/ele/ele-005.png" vertex="1" parent="1">
-      <mxGeometry x="350" y="50" width="100" height="135" as="geometry"/>
+    <mxCell id="4" value="Hello" style="node;image=/static/images/ele/ele-005.png" vertex="1" parent="1">
+      <mxGeometry x="470" y="50" width="100" height="135" as="geometry"/>
       <Object normalType="water.png" as="data">
         <Object id="5" icon="ele-005.png" title="智爷" as="element"/>
       </Object>
@@ -428,53 +428,36 @@ const titleVertex = graph.insertVertex(nodeRootVertex, null, title,
 </mxGraphModel>
 ```
 
-我们对第一个节点手动格式化
+每一个 mxCell 节点都有 parent 属性指向父节点。我们对 value="Hello" 的那个 mxCell 节点手动格式化
 
 ```xml
 <mxCell 
-  id="4"
-  value="男1号" 
-  style="node;image=/static/images/ele/ele-005.png"
-  vertex="1" 
-  parent="1">
+	id="4" 
+	value="Hello" 
+	style="node;image=/static/images/ele/ele-005.png" 
+	vertex="1" 
+	parent="1">
   <mxGeometry 
-    x="400" 
-    y="70" 
-    width="100" 
-    height="135" 
-    as="geometry"/>
+  		x="470" 
+  		y="50" 
+  		width="100" 
+  		height="135" 
+  		as="geometry"/>
   <Object 
-    as="data"
-    normalType="">
+  		normalType="water.png" 
+  		as="data">
     <Object 
-      as="element"
-      id="5" 
-      icon="ele-005.png" 
-      title="智爷" />
+    		id="5" 
+    		icon="ele-005.png" 
+    		title="智爷" 
+          as="element"/>
   </Object>
 </mxCell>
 ```
 
-再来对比这个节点的对象，可以发现它们只是同一个 Model 的不同表现形式，xml 正是将 [mxGraph.model](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.model) 格式化而成的。
+导出 xml 时，控制台打印一个 mxGraphModel 对象。对比上面的 xml 与 下图的节点对象，可以发现它们只是同一个 Model 的不同表现形式，xml 正是将 [mxGraph.model](https://jgraph.github.io/mxgraph/docs/js-api/files/view/mxGraph-js.html#mxGraph.model) 格式化而成的。
 
-```
-id: "3"
-mxObjectId: "mxCell#31"
-parent: mxCell
-children: (2) [mxCell, mxCell]
-data: {element: {…}, normalType: ""}
-geometry: mxGeometry {x: 0, y: 0, width: 100, height: 135}
-mxObjectId: "mxCell#30"
-style: "node;image=/static/images/ele/ele-005.png"
-value: "鼠标双击输入"
-vertex: true
-__proto__: Object
-source: null
-style: "normalType;constituent=1;fillColor=none;image=/static/images/normal-type/forest.png"
-target: null
-value: null
-vertex: true
-```
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1g1263c6n0fj30dd0e140f.jpg)
 
 ### 事件
 
@@ -518,7 +501,7 @@ vertex: true
       });
 ```
 
-还有就是对于子节点添加到父节点的情况(如本项目将 `titleVertex` 、`normalTypeVertex` 添加到`nodeRootVertex`)也是会触发 `Cell` 添加事件的。通常对于这些子节点不作处理，可以像 `consti.html` todo 外链 那个例子一样用一个 `isPart` 判断过滤掉。
+还有就是对于子节点添加到父节点的情况(如本项目将 `titleVertex` 、`normalTypeVertex` 添加到`nodeRootVertex`)也是会触发 `Cell` 添加事件的。通常对于这些子节点不作处理，可以像 [05.consistuent.html](https://github.com/jinzhanye/mxgraph-demos/blob/master/src/05.consistuent.html) 一样用一个 `isPart` 判断过滤掉。
 
 #### 自定义事件
 
