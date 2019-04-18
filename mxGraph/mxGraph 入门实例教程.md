@@ -19,6 +19,7 @@
 
 这篇教程分为两部分，第一部分结合我写的[一些例子](https://github.com/jinzhanye/mxgraph-demos)讲解基础知识。第二部分则利用第一部分讲解的知识开发一个小项目 [pokemon-diagram](https://github.com/jinzhanye/pokemon-diagram)。本教程会使用到 ES6 语法，而第二部分的项目是用 Vue 写的。阅读本教程需要你掌握这两项预备知识。
 
+
 ## 引入
 ### 使用 script 引入
 我们来分析一下官方的 [HelloWorld](https://github.com/jgraph/mxgraph/blob/master/javascript/examples/helloworld.html) 实例是怎样通过 script 标签引入 mxGraph 的
