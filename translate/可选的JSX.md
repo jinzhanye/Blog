@@ -2,7 +2,9 @@
 
 - flaws
 - a couple more
-
+- per se 拉丁语，可理解为英文的 itself
+- 转译器（transpiler）
+- this might be handy 方便
 
 # 可替代的JSX
 如今，JSX对于当前各种框架来说都是一个非常流行的模版选择，并非只是React(或受JSX启发的模版)。然而，如果你不喜欢使用JSX，或者你的项目想避免使用它，又或者只是受好奇心驱使，你想尝试如果不用JSX该怎么写React代码。最简单的答案是去阅读官方文档，然而官方文档有点短，以下有几个更多的选择。
@@ -72,3 +74,18 @@ class A extends React.Component {
 如果你使用 `React.createElement` 或 `h` 进行一些操作，你会发现它有几个缺陷。首先，这个函数需要三个参数。因此如果没有属性，你还必须要提供 `null` 占位，而 `className` 这个可能最常用的属性，每次都要先写入一个对象再写这个属性。
 
 你可以 [react-hyperscript](https://github.com/mlmorg/react-hyperscript) 作为代替方案。它并需要提供空属性作为参数，也允许你使用类似emmet的风格(`div#main.content` -\> `<div id="main" class="content">`)指定class和id。因此，我们的代码会有一点改善。 
+
+## HTM
+如果你不反对JSX，但不喜欢强制转译你的代码，这里有个叫  [htm](https://github.com/developit/htm) 的项目也许适合你。它的目标(看起来)是跟JSX做同样的事，但使用[模板语法](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals)。这肯定会增加一些额外的开销（你必须在运行时解析这些模版），但在你的情况也许是值得的。
+
+它的工作方式是包裹元素函数，在我们这里这个函数就是 `React.createElement`，但也可以是其他相似的API，然后返回一个函数，这个函数将会解析我们的模版然后准备返回跟 babel 一样的结果，但这些事仅仅在运行时执行。
+
+如你所见，它与真正的JSX几乎相同，我们只需要以稍微不同的方式插入变量；但是，这些主要是细节，如果你想在没有任何工具设置的情况下展示如何使用React，这可能很方便。
+
+## 类 Lisp 语法
+这个想法跟hyperscript相似，但是，这是个值得一看的优雅方法。这也很多类似的帮忙库，所以我这是我的主观选择；这也许能给你的项目带来灵感。
+
+[ijk](https://github.com/lukejacksonn/ijk) 将这种方法应用，你编写模版的时候只需要用到数组，将位置作为参数？。这样子的好处是你不用一味编写 `h` 函数（是的，即使这可能是重复的！）。下面是一个使用例子
+
+## 总结 
+本文没有建议你不要使用JSX，或者JSX是否一个好想法。你可能在想如果不用JSX你的代码能写成个什么样子，本文的目的只是回答这个问题。

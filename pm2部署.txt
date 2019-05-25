@@ -1,0 +1,1 @@
+pm2 start npm --name crs-blog-fe -- start

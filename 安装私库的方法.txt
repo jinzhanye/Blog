@@ -1,0 +1,18 @@
+安装私库的方法
+需要使用https协议，使用ssh协议不能安装
+yarn add https://github.com/jinzhanye/element.git
+
+npm whoami
+
+
+当执行npm publish 时，出现unauthorized 和 is not in the npm registry
+https://segmentfault.com/q/1010000013122721
+
+yarn add yuliang-element-ui
+
+
+  "name": "element-ui-uwgd",
+
+
+    "element-ui-uwgd": "^2.4.5",
+    "element-ui-custom-ac": "^1.3.3",
