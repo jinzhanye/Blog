@@ -63,6 +63,11 @@ type Post {
 ```
 
 ## 部署部署模型 & 迁移数据库
+
+## 示例
+#### TypeScript
+| Demo | 描述
+
 运行以下命令部署你的 Prisma API
 ```
 prisma deploy
@@ -120,6 +125,51 @@ main().catch(e => console.error(e))
 node index.js
 ```
 
+### 6.下一步
+下一步你可以干这些事件：
+
+- 使用 Prisma 客户端搭建一个应用
+- 查看一些示例
+- 阅读更多关于 Prisma 如何工作的资料
+
+
+| Demo | Description |
+|:------|:----------|
+| [`script`](https://github.com/prisma/prisma-examples/tree/master/typescript/script) | 脚本中 Prisma 客户端的简单用法 |
+| [`graphql`](https://github.com/prisma/prisma-examples/tree/master/typescript/graphql) |  基于 [`graphql-yoga`](https://github.com/prisma/graphql-yoga) 简单的 GraphQL 服务器  |
+| [`graphql-apollo-server`](https://github.com/prisma/prisma-examples/tree/master/typescript/graphql-apollo-server) | 基于 [`apollo-server`](https://www.apollographql.com/docs/apollo-server/) 简单的 GraphQL 服务器  |
+| [`graphql-crud`](https://github.com/prisma/prisma-examples/tree/master/typescript/graphql-crud) | 带完整 CRUD API 的 GraphQL 服务器 |
+| [`graphql-auth`](https://github.com/prisma/prisma-examples/tree/master/typescript/graphql-auth) |        带邮件密码验证及权限的 GraphQL 服务器 |
+| [`graphql-subscriptions`](https://github.com/prisma/prisma-examples/tree/master/typescript/graphql-subscriptions) | 带实时评阅的 GraphQL 服务器 |
+| [`rest-express`](https://github.com/prisma/prisma-examples/tree/master/typescript/rest-express) | 简单的 Express.js REST API |
+| [`grpc`](https://github.com/prisma/prisma-examples/tree/master/typescript/grpc) | 简单的 gRPC API |
+| [`docker-mongodb`](https://github.com/prisma/prisma-examples/tree/master/typescript/docker-mongodb) | 使用 MongoDB 在本地实现 Prisma |
+| [`docker-mysql`](https://github.com/prisma/prisma-examples/tree/master/typescript/docker-mysql) | 使用 MySQL 在本地实现 Prisma |
+| [`docker-postgres`](https://github.com/prisma/prisma-examples/tree/master/typescript/docker-postgres) | 使用 PostgreSQL 在本地实现 Prisma |
+| [`cli-app`](https://github.com/prisma/prisma-examples/tree/master/typescript/cli-app) | 简单的命令行 TODO 列表应用 |
+
+
+## 数据库连接器
+数据库连接器为 Prisma 与底层数据库之间提供连接。
+
+你可以连接以下数据库到 Prisma：
+
+- MySQL
+- PostgreSQL
+- MongoDB
+
+#### 即将推出的连接器
+如果你兴趣参与预览以下其中一个连接器的预览，请访问我们的 Slack ？？
+
+- xxx
+
+加入讨论或做贡献这会影响我们接下来的工作！
+
 ## 生词
-wizard 向导
-exposes 公开/暴露
+CLI wizard  命令行向导
+exposes CRUD operations 公开/暴露 CRUD 操作
+underlying database 底层数据库
+upcoming connectors 即将推出的连接器
+
+I'll reach out my hand to you, I'll have faith in all you do. 
+伸出我的手
