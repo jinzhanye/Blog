@@ -13,8 +13,22 @@ Stencil Components 也只是 Web Components，所以他们 so they work in any m
 Stencil 也提供很多在 Web Components 之上的关键能力，尤其是 SSR 不需要在 headless 浏览器上运行、预渲染、还有 对象作为属性（字符串代替）
 
 
+注：Stencil 和 Ionic 是完全独立的项目。Stencil 没有规定说要指定哪个框架作为 UI 框架，但 Ionic 是 Stencil 的最大用户（今天！）
+
+## 为什么使用 Stencil
+Stencil 是一种流行创意的新方法：在浏览器打造流畅、功能丰富的应用。开发 Stencil 是为了利用浏览器原生新的可用的主要能力，比如自定义元素 v1，允许开发者用更少的代码创建更快的应用且兼容所有框架
+
+
+Stencil 也是组织和库作者们在各种前端框架中构建可复用组件的解决方案，每个框架都有自己独立的组件系统。Stencil 组件可以与 Angular、React、Ember、Vue、JQuyer 搭配使用，或者不搭配任何框架使用，因为它们仅仅是纯 HTML 元素。
+
+与直接使用自定义组件相比，在每个 Stencil 组件内部是一个高效的虚拟 DOM 渲染系统，JSX 渲染能力，异步渲染管道（像 React Fiber），等等。这使得 Stencil 组件更加高性能同时保持与纯自定义组件完全兼容。把 Stencil 看作预先制作的自定义元素，就像你自己编写这些功能一样
+
 ## 生词
 next generation of performant mobile and desktop Web Components
 
 下一代高性能移动和桌面Web组件。
+
+prescribe v.规定
+
+a diverse spectrum of 各种各样的
 
