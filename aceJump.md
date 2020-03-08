@@ -7,7 +7,7 @@ ctrl+shift+; 所有空位
 
 切换项目快捷键
 
-option + commod + o 连同lib一起搜索文件
+option + command + o 连同lib一起搜索文件
 
 
 command + E 最近文件 
