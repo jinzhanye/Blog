@@ -110,3 +110,24 @@ module.exports = function () {
 
   loadModule(parsedUrl).then(/*...*/)
 ```
+
+loadModule 的作用
+
+`selector-loader` 很容易理解，就是提取 xxx
+
+```js
+module.exports = function (rawSource) {
+  this.cacheable()
+  const cb = this.async()
+  const { type } = loaderUtils.getOptions(this) || {}
+  const url = `!!${parserLoaderPath}!${loaderUtils.getRemainingRequest(this)}`
+  this.loadModule(url, (err, source) => {
+    if (err) {
+      return cb(err)
+    }
+    const parts = this.exec(source, url)
+    cb(null, parts[type].content)
+  })
+}
+
+```
