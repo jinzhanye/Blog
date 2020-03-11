@@ -120,6 +120,7 @@ module.exports = function (rawSource) {
   this.cacheable()
   const cb = this.async()
   const { type } = loaderUtils.getOptions(this) || {}
+  // !!parser.js!app.mina
   const url = `!!${parserLoaderPath}!${loaderUtils.getRemainingRequest(this)}`
   this.loadModule(url, (err, source) => {
     if (err) {
@@ -130,4 +131,24 @@ module.exports = function (rawSource) {
   })
 }
 
+
+
+	addModule(module, cacheGroup) {
+		const identifier = module.identifier();
+		// identifier 是 request 路径
+		if(this._modules[identifier]) {
+			return false;
+		}
+		
+		this._modules[identifier] = module;
+		if(this.cache) {
+			this.cache[cacheName] = module;
+		}
+		this.modules.push(module);
+		return true;
+	}
 ```
+
+## 其他
+多次 loadModule 因为有缓存的，所以不用担心性能
+
