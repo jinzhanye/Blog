@@ -1,15 +1,10 @@
-## 是什么
+# mina-loader 源码分析
 
-### mina-loader 分析
-从 test.js 的 basic 用例可以看出，解析 .mina 文件，输出 .js、.wxml、.json、.wxss  4 个文件
-
-- mina 调用 loader.loadModule，然后？
-- parser 将 .mina 文件转换成 'module.exports={config:{},template:'',script:'',style:''}'
-- mina-json-file 解析 app.json/component.json 里的配置路径
-- selector 调用 loader.loadModule，然后？
-
+团队最近需要对小程序进行工程化升级，在网上看了[《小程序工程化实践》](https://juejin.im/post/5d00aa5e5188255a57151c8a)一文收获满满，刚好文件提到的 [mina-webpack](https://github.com/tinajs/mina-webpack) 也是我们团队正在使用的工具。mina-webpack 是 [tinaJS](https://tina.js.org/#/?id=main) 配套的工程化工具。（有关 tinaJS源码在我的另一篇[文章](https://segmentfault.com/a/1190000021949561)有讲述）`mina-webpack` 包括好几个包，其中 `mina-runtime-webpack-plugin`、`mina-entry-webpack-plugin`、`mina-loader` 最为重要。《小程序工程化实践》已经讲解了 `mina-runtime-webpack-plugin`、`mina-entry-webpack-plugin` 的原理，本文主要讲解 `mina-loader` 原理。
 
 ## 分析
+mina-loader 的作用是将 `.mina` 文件分离成 `.json`、`.wxml`、`.js`、`wxss` 四种类型文件。
+
 
 ```
 // app.mina
@@ -40,7 +35,7 @@ view {
 </style>
 ```
 
-mina-loader 的作用是将 `.mina` 文件分离成 `.json`、`.wxml`、`.js`、`wxss` 四种类型文件。对于 mina-load 内部做了什么我们不从源码入手，
+对于 mina-loader 内部做了什么我们不从源码入手，
 而是从 webpack 输出的信息进行的领导。进入 example 目录，执行 `npm run dev`，可以看到如下信息
 
 ```
@@ -60,7 +55,7 @@ mina-loader 的作用是将 `.mina` 文件分离成 `.json`、`.wxml`、`.js`、
 [5] ../node_modules/@tinajs/mina-loader/node_modules/file-loader/dist/cjs.js?name=./[name].wxss!../node_modules/extract-loader/lib/extractLoader.js?{"publicPath":"/"}!../node_modules/css-loader!../node_modules/@tinajs/mina-loader/lib/loaders/selector.js?type=style!./app.mina 56 bytes [built]
 ```
 
-可以看到输出了 6 个 module，我们主要看后面 3 个，以 `!` 号为分割格式化一下可以看到一些规律
+可以看到输出了 6 个 module，我们主要看后面 3 个，为什么是!？？。·以 `!` 号为分割格式化一下可以看到一些规律
 
 ```
 [3]
@@ -90,12 +85,17 @@ mina-loader 的作用是将 `.mina` 文件分离成 `.json`、`.wxml`、`.js`、
 到此我们大概了解 `mina-loader` 的工作流程，就是分别按类型提取 `app.mina` 的内容，然后将用特定的 loader 处理特定的内容，最后输出不同类型的文件。那么接下来我们瞅一下 `mina-loader` 的源码，看具体是怎么做的。
 
 ## 源码分析
+先来看看整体的流程图，跟上面说的流程差不多
+
 ```
-// mina-loader/lib/index
-module.exports = require('./loaders/mina')
+// todo 加图
 ```
 
 ```js
+// mina-loader/lib/index
+module.exports = require('./loaders/mina')
+
+// mina-loader/lib/loaders/mina.js
 module.exports = function () {
   const done = this.async()
 
@@ -111,16 +111,18 @@ module.exports = function () {
   loadModule(parsedUrl).then(/*...*/)
 ```
 
-loadModule 的作用
+配合流程图看源码的话理解起来不困难。前文一直没提到 loadModule 是哪里来的，其实[loadModule](https://webpack.docschina.org/api/loaders/#this-loadmodule) 是 webpack loader 暴露给开发者使用的一个 api，用于在执行 loader 时也能去加载一个模块。然后再看看 selector-loader
 
-`selector-loader` 很容易理解，就是提取 xxx
+## selector-loader
+
+前文提到 `selector-loader` 是用来提取某一类型的文件内容
 
 ```js
 module.exports = function (rawSource) {
   this.cacheable()
   const cb = this.async()
   const { type } = loaderUtils.getOptions(this) || {}
-  // !!parser.js!app.mina
+  // url = '!!parser.js!app.mina'
   const url = `!!${parserLoaderPath}!${loaderUtils.getRemainingRequest(this)}`
   this.loadModule(url, (err, source) => {
     if (err) {
@@ -130,25 +132,65 @@ module.exports = function (rawSource) {
     cb(null, parts[type].content)
   })
 }
-
-
-
-	addModule(module, cacheGroup) {
-		const identifier = module.identifier();
-		// identifier 是 request 路径
-		if(this._modules[identifier]) {
-			return false;
-		}
-		
-		this._modules[identifier] = module;
-		if(this.cache) {
-			this.cache[cacheName] = module;
-		}
-		this.modules.push(module);
-		return true;
-	}
 ```
 
-## 其他
-多次 loadModule 因为有缓存的，所以不用担心性能
+操作跟 `mina-loader` 很像，利用 `parser-loader` 将 `.mina` 文件转换成如下对象
+
+```
+parts = {
+  "style": {
+    "type": "style",
+    "content": /*...*/,
+  },
+  "config": {
+    "type": "config",
+    "content": /*...*/,
+  },
+  "script": {
+    "type": "script",
+    "content": /*...*/,
+  },
+  "template": {
+    "type": "template",
+    "content": /*...*/,
+  }
+}
+
+```
+
+然后根据 `type` 返回对应的内容即可。但是这里有一个问题，我们看看下面代码
+
+```
+// mina-loader/lib/loaders/mina.js
+
+// ...
+const parsedUrl = `!!${parserLoaderPath}!${url}`
+// ...
+loadModule(parsedUrl)
+
+
+// mina-loader/lib/loaders/parser.js
+const url = `!!${parserLoaderPath}!${loaderUtils.getRemainingRequest(this)}`
+this.loadModule(url,/*....*/)
+```
+
+可以看到 `loaderModule(parseredUrl)` 也就是 `loadModule('!!parser.js!app.mina')` 这个模块被重复加载了多次，这样的话会不会带来性能的损耗呢？答案是不会的，每次 `loadModule` 后 webpack 会将加载完的 module 以请求路径为 key 保存在 `Compilation` 对象。参考源码如下
+
+```
+// webpack/lib/Compilation.js
+addModule(module, cacheGroup) {
+	const identifier = module.identifier();
+	// identifier 是 request 路径，在这个案例就是 'parser.js!app.mina'
+	if(this._modules[identifier]) {
+		return false;
+	}
+	// 缓存模块
+	this._modules[identifier] = module;
+	if(this.cache) {
+	   this.cache[cacheName] = module;
+	}
+	this.modules.push(module);
+	return true;
+}
+```
 
